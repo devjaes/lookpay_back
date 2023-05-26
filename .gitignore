@@ -180,4 +180,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+#env
+.env
+
 # End of https://www.toptal.com/developers/gitignore/api/java,windows,macos,linux,react,web,git

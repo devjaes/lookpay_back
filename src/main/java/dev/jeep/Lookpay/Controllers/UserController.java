@@ -1,4 +1,4 @@
-package dev.jeep.Lookpay.Controllers;
+package dev.jeep.Lookpay.controllers;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;

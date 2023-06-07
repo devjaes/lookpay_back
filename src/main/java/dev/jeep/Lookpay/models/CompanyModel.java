@@ -1,5 +1,6 @@
 package dev.jeep.Lookpay.models;
 
+import java.security.Timestamp;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -21,6 +22,9 @@ public class CompanyModel {
 
     @Column(nullable = false, unique = true)
     private String ruc;
+
+    @Column(nullable = false)
+    private Timestamp originDate;
 
     @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")

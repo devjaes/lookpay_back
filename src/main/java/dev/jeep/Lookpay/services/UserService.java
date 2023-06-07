@@ -15,12 +15,11 @@ import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.UserRepository;
 
 @Service
-public class UserService extends CrudHandler {
+public class UserService {
     @Autowired
     UserRepository userRepository;
 
-    @Override
-    public ResponseEntity<LinkedHashMap<String, Object>> create(UserRegisterDTO user, String gender) {
+    public ResponseEntity<LinkedHashMap<String, Object>> register(UserRegisterDTO user) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
         if (!this.validateIfExists(user.getEmail())) {
@@ -33,19 +32,12 @@ public class UserService extends CrudHandler {
         UserModel newUser = this.convertDtoToModel(user);
         userRepository.save(newUser);
 
-    }
+        response.put("message", "User created successfully");
+        response.put("status", HttpStatus.CREATED.value());
+        response.put("user", newUser);
 
-    private void processUserByRol(UserModel user, UserRegisterDTO userDto, String Gender) {
-        switch (user.getRol()) {
-            case ADMIN:
-                break;
-            case CLIENT:
-                break;
-            case COMPANY:
-                break;
-            default:
-                break;
-        }
+        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
+
     }
 
     public UserModel convertDtoToModel(UserRegisterDTO user) {

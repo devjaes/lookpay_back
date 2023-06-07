@@ -1,6 +1,6 @@
 package dev.jeep.Lookpay.models;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.util.List;
 
 import jakarta.persistence.*;

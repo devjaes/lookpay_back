@@ -36,7 +36,7 @@ public class UserModel {
     private String address;
 
     @Column(name = "phone_number", nullable = true)
-    private String phone;
+    private String phoneNumber;
 
     @OneToOne(mappedBy = "user")
     private ClientModel client;

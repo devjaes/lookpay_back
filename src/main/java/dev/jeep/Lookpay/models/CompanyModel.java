@@ -24,7 +24,7 @@ public class CompanyModel {
     private String ruc;
 
     @Column(nullable = false)
-    private Timestamp originDate;
+    private Timestamp fundationDate;
 
     @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")

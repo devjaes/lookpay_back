@@ -16,5 +16,7 @@ public class UserRegisterDTO {
     private String phoneNumber;
     private String originDate;
     private Long cityId;
+    private String dni_ruc;
+    private String gender;
 
 }

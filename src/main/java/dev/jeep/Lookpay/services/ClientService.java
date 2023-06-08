@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties.Web.Client;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,11 +27,10 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
-    public ResponseEntity<LinkedHashMap<String, Object>> register(UserRegisterDTO userDto, String dni, String gender,
-            String birthDate) {
+    public ResponseEntity<LinkedHashMap<String, Object>> register(UserRegisterDTO userDto) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-        if (this.validateIfExists(dni)) {
+        if (this.validateIfExists(userDto.getDni_ruc())) {
             response.put("message", "Client already exist");
             response.put("status", HttpStatus.BAD_REQUEST.value());
 
@@ -43,15 +43,18 @@ public class ClientService {
             return userResponse;
         }
 
-        UserModel user = userService.convertDtoToModel(userDto);
+        UserModel user = userService.getByEmail(userDto.getEmail());
 
-        ClientModel newClient = new ClientModel(null, dni, GenderEnum.getGenderEnum(gender),
-                Timestamp.valueOf(DateUtil.transformWebDateToDBDate(birthDate)), user, null, null);
+        ClientModel newClient = new ClientModel(null, userDto.getDni_ruc(),
+                GenderEnum.getGenderEnum(userDto.getGender()),
+                Timestamp.valueOf(DateUtil.transformWebDateToDBDate(userDto.getOriginDate())), user, null, null);
         clientRepository.save(newClient);
+
+        ClientResponseDTO clientDto = this.convertModelToDto(newClient);
 
         response.put("message", "Client created successfully");
         response.put("status", HttpStatus.CREATED.value());
-        response.put("client", newClient);
+        response.put("client", clientDto);
 
         return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
     }

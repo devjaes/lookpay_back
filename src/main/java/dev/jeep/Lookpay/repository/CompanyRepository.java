@@ -9,6 +9,6 @@ import dev.jeep.Lookpay.models.CompanyModel;
 
 @Repository
 public interface CompanyRepository extends JpaRepository<CompanyModel, Long> {
-    @Query(value = "SELECT * FROM companies WHERE ruc = :ruc", nativeQuery = true)
+    @Query(value = "SELECT * FROM companies WHERE ruc=:ruc", nativeQuery = true)
     CompanyModel getByRuc(@Param("ruc") String ruc);
 }

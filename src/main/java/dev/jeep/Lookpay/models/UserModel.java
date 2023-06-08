@@ -44,4 +44,7 @@ public class UserModel {
 
     @OneToOne(mappedBy = "user")
     private ClientModel client;
+
+    @OneToOne(mappedBy = "user")
+    private CompanyModel company;
 }

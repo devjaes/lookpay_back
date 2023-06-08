@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class CompanyResponse {
+public class CompanyResponseDTO {
     private Long id;
     private String name;
     private String ruc;

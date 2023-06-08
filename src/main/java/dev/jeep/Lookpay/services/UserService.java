@@ -31,9 +31,11 @@ public class UserService {
     public ResponseEntity<LinkedHashMap<String, Object>> register(UserRegisterDTO user) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-        if (!this.validateIfExists(user.getEmail())) {
+        if (this.validateIfExists(user.getEmail())) {
+            UserModel userExist = this.getByEmail(user.getEmail());
             response.put("message", "User already exist");
             response.put("status", HttpStatus.BAD_REQUEST.value());
+            response.put("user", userExist.getName());
 
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
         }
@@ -68,8 +70,12 @@ public class UserService {
         return newUser;
     }
 
+    public UserModel getByEmail(String email) {
+        return userRepository.getByEmail(email);
+    }
+
     private Boolean validateIfExists(String email) {
-        UserModel user = userRepository.getByEmail(email);
+        UserModel user = this.getByEmail(email);
         return user != null;
     }
 

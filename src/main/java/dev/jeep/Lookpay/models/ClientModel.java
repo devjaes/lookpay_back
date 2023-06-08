@@ -41,5 +41,5 @@ public class ClientModel {
 
     @ManyToMany()
     @JoinTable(name = "client_bank_accounts", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "bank_account_id"))
-    private List<BankAccountModel> bankAccounts;
+    private List<BankCoopAccountModel> bankAccounts;
 }

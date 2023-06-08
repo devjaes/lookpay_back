@@ -25,6 +25,13 @@ public class CompanyService {
             String originDate) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
+        if (this.validateIfExists(ruc)) {
+            response.put("message", "Company already exist");
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
+
         ResponseEntity<LinkedHashMap<String, Object>> userResponse = userService.register(userDto);
 
         if (userResponse.getStatusCode().value() != HttpStatus.CREATED.value()) {
@@ -42,5 +49,10 @@ public class CompanyService {
 
         return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
 
+    }
+
+    public boolean validateIfExists(String ruc) {
+        CompanyModel company = companyRepository.getByRuc(ruc);
+        return company != null;
     }
 }

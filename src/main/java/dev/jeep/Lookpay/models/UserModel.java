@@ -38,7 +38,10 @@ public class UserModel {
     @Column(name = "phone_number", nullable = true)
     private String phoneNumber;
 
+    @ManyToOne()
+    @JoinColumn(name = "city_id")
+    private CityModel city;
+
     @OneToOne(mappedBy = "user")
     private ClientModel client;
-
 }

@@ -7,14 +7,15 @@ import lombok.RequiredArgsConstructor;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class UserRegisterDTO {
+public class ClientResponseDTO {
+    private Long id;
     private String name;
+    private String dni;
+    private String gender;
     private String email;
-    private String password;
-    private String rol;
-    private String address;
     private String phoneNumber;
-    private String originDate;
-    private Long cityId;
+    private String city;
+    private String province;
+    private String address;
 
 }

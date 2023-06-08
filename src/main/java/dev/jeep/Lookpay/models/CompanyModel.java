@@ -32,6 +32,6 @@ public class CompanyModel {
 
     @ManyToMany()
     @JoinTable(name = "company_bank_accounts", joinColumns = @JoinColumn(name = "company_id"), inverseJoinColumns = @JoinColumn(name = "bank_account_id"))
-    private List<BankAccountModel> bankAccounts;
+    private List<BankCoopAccountModel> bankAccounts;
 
 }

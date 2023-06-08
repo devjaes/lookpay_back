@@ -3,16 +3,17 @@ package dev.jeep.Lookpay.models;
 import java.util.List;
 
 import dev.jeep.Lookpay.enums.BankAccountTypeEnum;
+import dev.jeep.Lookpay.enums.BankCoopEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Entity
-@Table(name = "bank_accounts")
+@Table(name = "bank_coop_accounts")
 @AllArgsConstructor
 @RequiredArgsConstructor
 
-public class BankAccountModel {
+public class BankCoopAccountModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false, unique = true)
@@ -26,7 +27,8 @@ public class BankAccountModel {
     private BankAccountTypeEnum accountType;
 
     @Column(nullable = false)
-    private String bankName;
+    @Enumerated(EnumType.STRING)
+    private BankCoopEnum bankName;
 
     @Column(nullable = false)
     private String bankCode;

@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class UserModifyDTO {
+public class UserUpdateDTO {
     private String phoneNumber;
     private String password;
     private String email;
+    private String address;
+    private Long cityId;
 }

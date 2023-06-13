@@ -37,4 +37,10 @@ public class UserController {
     public ResponseEntity<LinkedHashMap<String, Object>> getCities() {
         return userService.getCities();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LinkedHashMap<String, Object>> getUser(@PathVariable("id") Long id) {
+        return userService.getUser(id);
+    }
+
 }

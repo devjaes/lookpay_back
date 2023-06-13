@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import dev.jeep.Lookpay.dtos.CityDTO;
+import dev.jeep.Lookpay.dtos.ClientResponseDTO;
+import dev.jeep.Lookpay.dtos.CompanyResponseDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
+import dev.jeep.Lookpay.dtos.UserResponseDTO;
 import dev.jeep.Lookpay.dtos.UserUpdateDTO;
 import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.CityModel;
@@ -68,6 +71,45 @@ public class UserService {
         newUser.setPhoneNumber(user.getPhoneNumber());
 
         return newUser;
+    }
+
+    public ResponseEntity<LinkedHashMap<String, Object>> getUser(Long id) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        UserModel user = userRepository.findById(id).get();
+
+        if (user == null) {
+            response.put("message", "User not found");
+            response.put("status", HttpStatus.NOT_FOUND.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+        }
+
+        UserResponseDTO userResponse = new UserResponseDTO();
+        userResponse.setId(user.getId());
+        userResponse.setName(user.getName());
+        userResponse.setEmail(user.getEmail());
+
+        if (user.getRol() == RolEnum.CLIENT) {
+            userResponse.setDni_ruc(user.getClient().getDni());
+            userResponse.setOriginDate(user.getClient().getBirthDate().toString());
+            userResponse.setGender(user.getClient().getGender().toString());
+
+        } else {
+            userResponse.setDni_ruc(user.getCompany().getRuc());
+            userResponse.setOriginDate(user.getCompany().getFundationDate().toString());
+        }
+
+        userResponse.setRol(user.getRol().toString());
+        userResponse.setCity(user.getCity().getName());
+        userResponse.setProvince(user.getCity().getProvince().getName());
+        userResponse.setAddress(user.getAddress());
+        userResponse.setPhoneNumber(user.getPhoneNumber());
+
+        response.put("message", "User found");
+        response.put("status", HttpStatus.OK.value());
+        response.put("user", userResponse);
+
+        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
     }
 
     public UserModel getByEmail(String email) {

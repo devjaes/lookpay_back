@@ -15,6 +15,7 @@ import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.CompanyModel;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.CompanyRepository;
+import dev.jeep.Lookpay.utils.DateUtil;
 
 @Service
 public class CompanyService {
@@ -40,15 +41,17 @@ public class CompanyService {
             return userResponse;
         }
 
-        UserModel user = userService.convertDtoToModel(userDto);
+        UserModel user = userService.getByEmail(userDto.getEmail());
 
         CompanyModel newCompany = new CompanyModel(null, userDto.getDni_ruc(),
-                Timestamp.valueOf(userDto.getOriginDate()), user, null);
+                Timestamp.valueOf(DateUtil.transformWebDateToDBDate(userDto.getOriginDate())), user, null);
         companyRepository.save(newCompany);
+
+        CompanyResponseDTO companyDto = this.convertModelToDto(newCompany);
 
         response.put("message", "Company created successfully");
         response.put("status", HttpStatus.CREATED.value());
-        response.put("company", newCompany);
+        response.put("company", companyDto);
 
         return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
 

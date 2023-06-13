@@ -5,7 +5,6 @@ import java.util.LinkedHashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,7 +29,7 @@ public class UserController {
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<LinkedHashMap<String, Object>> ModifyUser(@PathVariable("id") Long id,
-            @ModelAttribute UserUpdateDTO user) {
+            @RequestBody UserUpdateDTO user) {
         return userService.update(id, user);
     }
 

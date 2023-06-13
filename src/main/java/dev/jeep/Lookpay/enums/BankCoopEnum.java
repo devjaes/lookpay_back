@@ -20,6 +20,7 @@ public enum BankCoopEnum {
     BANCO_GENERAL_RUMIÑAHUI("Banco General Rumiñahui"),
     BANCO_COOPNACIONAL("Banco Coopnacional"),
     COOP_JEP("Cooperativa JEP"),
+    COOP_MUSHUC_RUNA("Cooperativa de Ahorro y Crédito Mushuc Runa"),
     COOP_CHORDELEG("Cooperativa de Ahorro y Crédito Chordeleg"),
     COOP_JARDIN_AZUAYO("Cooperativa de Ahorro y Crédito Jardín Azuayo"),
     COOP_POLICIA_NACIONAL("Cooperativa de Ahorro y Crédito Policía Nacional"),

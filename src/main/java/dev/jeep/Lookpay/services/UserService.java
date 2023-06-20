@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import dev.jeep.Lookpay.dtos.CityDTO;
-import dev.jeep.Lookpay.dtos.ClientResponseDTO;
-import dev.jeep.Lookpay.dtos.CompanyResponseDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
 import dev.jeep.Lookpay.dtos.UserResponseDTO;
 import dev.jeep.Lookpay.dtos.UserUpdateDTO;
@@ -23,6 +21,7 @@ import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.CityRepository;
 import dev.jeep.Lookpay.repository.UserRepository;
 
+//Probando
 @Service
 public class UserService {
     @Autowired

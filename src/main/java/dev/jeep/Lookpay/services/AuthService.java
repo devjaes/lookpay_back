@@ -44,15 +44,12 @@ public class AuthService {
         userResponse.put("address", user.getAddress());
         userResponse.put("city", user.getCity().getName());
         userResponse.put("province", user.getCity().getProvince().getName());
+        userResponse.put("rol", user.getRol());
 
-        if (user.getRol().equals(RolEnum.ADMIN)) {
-            userResponse.put("rol", "ADMIN");
-        } else if (user.getRol().equals(RolEnum.CLIENT)) {
-            userResponse.put("rol", "CLIENT");
+        if (user.getRol().equals(RolEnum.CLIENT)) {
             userResponse.put("dni", user.getClient().getDni());
             userResponse.put("gender", user.getClient().getGender().toString());
-        } else {
-            userResponse.put("rol", "COMPANY");
+        } else if (user.getRol().equals(RolEnum.COMPANY)) {
             userResponse.put("ruc", user.getCompany().getRuc());
             userResponse.put("fundationDate", user.getCompany().getFundationDate().toString());
         }

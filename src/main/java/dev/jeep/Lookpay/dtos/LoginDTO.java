@@ -1,8 +1,21 @@
 package dev.jeep.Lookpay.dtos;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Setter
+
+@Getter
+
+@AllArgsConstructor
+
+@RequiredArgsConstructor
+
+@ToString
+
 public class LoginDTO {
     private String email;
     private String password;

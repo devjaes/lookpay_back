@@ -28,4 +28,14 @@ public class CompanyController {
     public ResponseEntity<LinkedHashMap<String, Object>> getAll() {
         return companyService.getAll();
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LinkedHashMap<String, Object>> get(Long id) {
+        return companyService.get(id);
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<LinkedHashMap<String, Object>> getByUserId(Long id) {
+        return companyService.getByUserId(id);
+    }
 }

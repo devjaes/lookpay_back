@@ -15,12 +15,16 @@ import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.CompanyModel;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.CompanyRepository;
+import dev.jeep.Lookpay.repository.UserRepository;
 import dev.jeep.Lookpay.utils.DateUtil;
 
 @Service
 public class CompanyService {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private CompanyRepository companyRepository;
@@ -62,17 +66,32 @@ public class CompanyService {
         return company != null;
     }
 
-    public ResponseEntity<LinkedHashMap<String, Object>> getCompanyById(String rol, Long companyId) {
+    public ResponseEntity<LinkedHashMap<String, Object>> get(Long companyId) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-        if (!RolEnum.getRolEnum(rol).equals(RolEnum.ADMIN)) {
-            response.put("message", "You don't have permission to do this");
-            response.put("status", HttpStatus.UNAUTHORIZED.value());
+        CompanyModel company = companyRepository.findById(companyId).get();
 
-            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.UNAUTHORIZED);
+        if (company == null) {
+            response.put("message", "Company not found");
+            response.put("status", HttpStatus.NOT_FOUND.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
-        CompanyModel company = companyRepository.findById(companyId).get();
+        CompanyResponseDTO companyDto = this.convertModelToDto(company);
+
+        response.put("message", "Company found");
+        response.put("status", HttpStatus.OK.value());
+        response.put("company", companyDto);
+
+        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<LinkedHashMap<String, Object>> getByUserId(Long userId) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+
+        UserModel userModel = userRepository.findById(userId).get();
+        CompanyModel company = userModel.getCompany();
 
         if (company == null) {
             response.put("message", "Company not found");

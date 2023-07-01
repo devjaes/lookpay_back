@@ -121,20 +121,6 @@ public class UserService {
         return user != null;
     }
 
-    public ResponseEntity<LinkedHashMap<String, Object>> getCities() {
-        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
-        List<CityModel> cities = cityRepository.findAll();
-        List<CityDTO> citiesDTO = new ArrayList<CityDTO>();
-
-        for (CityModel city : cities) {
-            citiesDTO.add(new CityDTO(city.getId(), city.getName(), city.getProvince().getName()));
-        }
-
-        response.put("cities", citiesDTO);
-        response.put("status", HttpStatus.OK.value());
-        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
-    }
-
     public ResponseEntity<LinkedHashMap<String, Object>> update(Long userId, UserUpdateDTO userUpdate) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 

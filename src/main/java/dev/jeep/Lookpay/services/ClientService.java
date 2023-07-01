@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,12 +17,16 @@ import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.ClientModel;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.ClientRepository;
+import dev.jeep.Lookpay.repository.UserRepository;
 import dev.jeep.Lookpay.utils.DateUtil;
 
 @Service
 public class ClientService {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private ClientRepository clientRepository;
@@ -63,17 +68,32 @@ public class ClientService {
         return client != null;
     }
 
-    public ResponseEntity<LinkedHashMap<String, Object>> getClientById(String rol, Long clientId) {
+    public ResponseEntity<LinkedHashMap<String, Object>> get(Long clientId) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-        if (!RolEnum.getRolEnum(rol).equals(RolEnum.ADMIN)) {
-            response.put("message", "You don't have permission to do this");
-            response.put("status", HttpStatus.UNAUTHORIZED.value());
+        ClientModel client = clientRepository.findById(clientId).get();
 
-            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.UNAUTHORIZED);
+        if (client == null) {
+            response.put("message", "Client not found");
+            response.put("status", HttpStatus.NOT_FOUND.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
-        ClientModel client = clientRepository.findById(clientId).get();
+        ClientResponseDTO clientDto = this.convertModelToDto(client);
+
+        response.put("message", "Client found");
+        response.put("status", HttpStatus.OK.value());
+        response.put("client", clientDto);
+
+        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+    }
+
+    public ResponseEntity<LinkedHashMap<String, Object>> getByUserID(Long userId) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+
+        UserModel user = userRepository.findById(userId).get();
+        ClientModel client = user.getClient();
 
         if (client == null) {
             response.put("message", "Client not found");

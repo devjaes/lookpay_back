@@ -1,11 +1,10 @@
 package dev.jeep.Lookpay.services;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,12 +12,10 @@ import org.springframework.stereotype.Service;
 import dev.jeep.Lookpay.dtos.ClientResponseDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
 import dev.jeep.Lookpay.enums.GenderEnum;
-import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.ClientModel;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.ClientRepository;
 import dev.jeep.Lookpay.repository.UserRepository;
-import dev.jeep.Lookpay.utils.DateUtil;
 
 @Service
 public class ClientService {
@@ -33,34 +30,43 @@ public class ClientService {
 
     public ResponseEntity<LinkedHashMap<String, Object>> register(UserRegisterDTO userDto) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        try {
+            if (this.validateIfExists(userDto.getDni_ruc())) {
+                response.put("message", "Client already exist");
+                response.put("status", HttpStatus.BAD_REQUEST.value());
 
-        if (this.validateIfExists(userDto.getDni_ruc())) {
-            response.put("message", "Client already exist");
-            response.put("status", HttpStatus.BAD_REQUEST.value());
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            }
 
-            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            ClientModel newClient = new ClientModel(null, userDto.getDni_ruc(),
+                    GenderEnum.getGenderEnum(userDto.getGender()),
+                    Date.valueOf(userDto.getOriginDate()), null, null, null);
+
+            ResponseEntity<LinkedHashMap<String, Object>> userResponse = userService.register(userDto);
+
+            if (userResponse.getStatusCode().value() != HttpStatus.CREATED.value()) {
+                return userResponse;
+            }
+
+            UserModel user = userService.getByEmail(userDto.getEmail());
+            newClient.setUser(user);
+
+            clientRepository.save(newClient);
+
+            ClientResponseDTO clientDto = this.convertModelToDto(newClient);
+
+            response.put("message", "Client created successfully");
+            response.put("status", HttpStatus.CREATED.value());
+            response.put("client", clientDto);
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
+        } catch (Exception e) {
+            response.put("message", "Error creating client");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        ResponseEntity<LinkedHashMap<String, Object>> userResponse = userService.register(userDto);
-
-        if (userResponse.getStatusCode().value() != HttpStatus.CREATED.value()) {
-            return userResponse;
-        }
-
-        UserModel user = userService.getByEmail(userDto.getEmail());
-
-        ClientModel newClient = new ClientModel(null, userDto.getDni_ruc(),
-                GenderEnum.getGenderEnum(userDto.getGender()),
-                Timestamp.valueOf(DateUtil.transformWebDateToDBDate(userDto.getOriginDate())), user, null, null);
-        clientRepository.save(newClient);
-
-        ClientResponseDTO clientDto = this.convertModelToDto(newClient);
-
-        response.put("message", "Client created successfully");
-        response.put("status", HttpStatus.CREATED.value());
-        response.put("client", clientDto);
-
-        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
     }
 
     public boolean validateIfExists(String dni) {

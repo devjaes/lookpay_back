@@ -1,6 +1,6 @@
 package dev.jeep.Lookpay.services;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -11,12 +11,10 @@ import org.springframework.stereotype.Service;
 
 import dev.jeep.Lookpay.dtos.CompanyResponseDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
-import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.CompanyModel;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.CompanyRepository;
 import dev.jeep.Lookpay.repository.UserRepository;
-import dev.jeep.Lookpay.utils.DateUtil;
 
 @Service
 public class CompanyService {
@@ -32,32 +30,44 @@ public class CompanyService {
     public ResponseEntity<LinkedHashMap<String, Object>> register(UserRegisterDTO userDto) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-        if (this.validateIfExists(userDto.getDni_ruc())) {
-            response.put("message", "Company already exist");
-            response.put("status", HttpStatus.BAD_REQUEST.value());
+        try {
+            if (this.validateIfExists(userDto.getDni_ruc())) {
+                response.put("message", "Company already exist");
+                response.put("status", HttpStatus.BAD_REQUEST.value());
 
-            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            CompanyModel newCompany = new CompanyModel(null, userDto.getDni_ruc(),
+                    Date.valueOf(userDto.getOriginDate()), null, null);
+
+            ResponseEntity<LinkedHashMap<String, Object>> userResponse = userService.register(userDto);
+
+            if (userResponse.getStatusCode().value() != HttpStatus.CREATED.value()) {
+                response.put("message", "Error creating company");
+                response.put("userResponse", userResponse);
+                response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            UserModel user = userService.getByEmail(userDto.getEmail());
+            newCompany.setUser(user);
+            companyRepository.save(newCompany);
+
+            CompanyResponseDTO companyDto = this.convertModelToDto(newCompany);
+
+            response.put("message", "Company created successfully");
+            response.put("status", HttpStatus.CREATED.value());
+            response.put("company", companyDto);
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            response.put("message", "Error creating company");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        ResponseEntity<LinkedHashMap<String, Object>> userResponse = userService.register(userDto);
-
-        if (userResponse.getStatusCode().value() != HttpStatus.CREATED.value()) {
-            return userResponse;
-        }
-
-        UserModel user = userService.getByEmail(userDto.getEmail());
-
-        CompanyModel newCompany = new CompanyModel(null, userDto.getDni_ruc(),
-                Timestamp.valueOf(DateUtil.transformWebDateToDBDate(userDto.getOriginDate())), user, null);
-        companyRepository.save(newCompany);
-
-        CompanyResponseDTO companyDto = this.convertModelToDto(newCompany);
-
-        response.put("message", "Company created successfully");
-        response.put("status", HttpStatus.CREATED.value());
-        response.put("company", companyDto);
-
-        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
 
     }
 
@@ -89,7 +99,7 @@ public class CompanyService {
 
     public ResponseEntity<LinkedHashMap<String, Object>> getByUserId(Long userId) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
-
+        System.out.println("______________________________________________________________" + userId);
         UserModel userModel = userRepository.findById(userId).get();
         CompanyModel company = userModel.getCompany();
 

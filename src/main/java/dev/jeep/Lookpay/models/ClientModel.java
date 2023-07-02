@@ -1,6 +1,6 @@
 package dev.jeep.Lookpay.models;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.List;
 
 import dev.jeep.Lookpay.enums.GenderEnum;
@@ -29,7 +29,7 @@ public class ClientModel {
     private GenderEnum gender;
 
     @Column(nullable = false)
-    private Timestamp birthDate;
+    private Date birthDate;
 
     @OneToOne()
     @JoinColumn(name = "user_id", referencedColumnName = "id")

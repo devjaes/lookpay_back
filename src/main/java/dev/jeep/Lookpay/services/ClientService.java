@@ -151,4 +151,12 @@ public class ClientService {
         return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
     }
 
+    ClientModel getByDni(String dni) {
+        return clientRepository.getByDni(dni);
+    }
+
+    ClientModel getById(Long id) {
+        return clientRepository.findById(id).get();
+    }
+
 }

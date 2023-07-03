@@ -38,7 +38,7 @@ public enum BankCoopEnum {
         this.bankName = bankName;
     }
 
-    public static BankCoopEnum getBankCoopEnum(String bankName) {
+    public static BankCoopEnum fromString(String bankName) {
         for (BankCoopEnum bankCoopEnum : BankCoopEnum.values()) {
             if (bankCoopEnum.bankName.equals(bankName)) {
                 return bankCoopEnum;

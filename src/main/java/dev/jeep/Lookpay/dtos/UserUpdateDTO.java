@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class UserUpdateDTO {
+    private String rol;
     private String phoneNumber;
     private String password;
     private String email;

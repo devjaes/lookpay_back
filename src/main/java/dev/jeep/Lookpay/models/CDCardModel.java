@@ -1,13 +1,18 @@
 package dev.jeep.Lookpay.models;
 
-import java.util.List;
+import java.sql.Date;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import dev.jeep.Lookpay.enums.CardTypeEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Entity
 @Table(name = "cd_cards")
+@Data
 @AllArgsConstructor
 @RequiredArgsConstructor
 
@@ -16,6 +21,10 @@ public class CDCardModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false, updatable = false, unique = true)
     private Long id;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CardTypeEnum cardType;
 
     @Column(nullable = false, unique = true)
     private String number;
@@ -27,8 +36,12 @@ public class CDCardModel {
     private String ccv;
 
     @Column(nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM")
     private String expirationDate;
 
-    @ManyToMany(mappedBy = "cdCards")
-    private List<ClientModel> clients;
+    @Column(nullable = false)
+    private Double balance;
+
+    @OneToOne(mappedBy = "cdCard")
+    private PaymentMethodModel paymentMethod;
 }

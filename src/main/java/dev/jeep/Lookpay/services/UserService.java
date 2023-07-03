@@ -1,8 +1,6 @@
 package dev.jeep.Lookpay.services;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,9 +9,6 @@ import org.springframework.stereotype.Service;
 
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
-import dev.jeep.Lookpay.dtos.CityDTO;
-import dev.jeep.Lookpay.dtos.ClientResponseDTO;
-import dev.jeep.Lookpay.dtos.CompanyResponseDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
 import dev.jeep.Lookpay.dtos.UserResponseDTO;
 import dev.jeep.Lookpay.dtos.UserUpdateDTO;
@@ -21,6 +16,8 @@ import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.CityModel;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.CityRepository;
+import dev.jeep.Lookpay.repository.ClientRepository;
+import dev.jeep.Lookpay.repository.CompanyRepository;
 import dev.jeep.Lookpay.repository.UserRepository;
 
 @Service
@@ -30,6 +27,12 @@ public class UserService {
 
     @Autowired
     CityRepository cityRepository;
+
+    @Autowired
+    ClientRepository clientRepository;
+
+    @Autowired
+    CompanyRepository companyRepository;
 
     public ResponseEntity<LinkedHashMap<String, Object>> register(UserRegisterDTO user) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
@@ -123,8 +126,13 @@ public class UserService {
 
     public ResponseEntity<LinkedHashMap<String, Object>> update(Long userId, UserUpdateDTO userUpdate) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        UserModel user;
 
-        UserModel user = userRepository.findById(userId).get();
+        if (RolEnum.getRolEnum(userUpdate.getRol()) == RolEnum.CLIENT) {
+            user = clientRepository.findById(userId).get().getUser();
+        } else {
+            user = companyRepository.findById(userId).get().getUser();
+        }
 
         if (user == null) {
             response.put("message", "User not found");
@@ -133,25 +141,31 @@ public class UserService {
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
-        if (userUpdate.getPhoneNumber() != null) {
+        if (userUpdate.getPhoneNumber() != "") {
             user.setPhoneNumber(userUpdate.getPhoneNumber());
         }
 
-        if (userUpdate.getPassword() != null) {
+        if (userUpdate.getPassword() != "") {
             Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
             String hash = argon2.hash(1, 1024, 1, userUpdate.getPassword());
             user.setPassword(hash);
         }
 
-        if (userUpdate.getEmail() != null) {
+        if (userUpdate.getEmail() != "") {
+            if (this.validateIfExists(userUpdate.getEmail())) {
+                response.put("message", "Email already exist");
+                response.put("status", HttpStatus.BAD_REQUEST.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            }
             user.setEmail(userUpdate.getEmail());
         }
 
-        if (userUpdate.getAddress() != null) {
+        if (userUpdate.getAddress() != "") {
             user.setAddress(userUpdate.getAddress());
         }
 
-        if (userUpdate.getCityId() != null) {
+        if (userUpdate.getCityId() != null || userUpdate.getCityId() != 0) {
             user.setCity(cityRepository.findById(userUpdate.getCityId()).get());
         }
 

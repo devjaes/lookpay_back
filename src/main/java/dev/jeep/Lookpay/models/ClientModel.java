@@ -35,11 +35,11 @@ public class ClientModel {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private UserModel user;
 
-    @ManyToMany()
-    @JoinTable(name = "client_cd_cards", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "cd_card_id"))
-    private List<CDCardModel> cdCards;
+    @OneToMany()
+    @JoinColumn(name = "client_id", referencedColumnName = "id")
+    private List<PaymentMethodModel> paymentMethods;
 
-    @ManyToMany()
-    @JoinTable(name = "client_bank_accounts", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "bank_account_id"))
-    private List<BankCoopAccountModel> bankAccounts;
+    @OneToOne()
+    @JoinColumn(name = "prefered_account_id", referencedColumnName = "id")
+    private PaymentMethodModel preferedAccount;
 }

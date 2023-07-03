@@ -7,9 +7,9 @@ public enum BankAccountTypeEnum {
 
     public static BankAccountTypeEnum fromString(String str) {
         switch (str) {
-            case "SAVINGS_ACCOUNT":
+            case "CUENTA DE AHORROS":
                 return BankAccountTypeEnum.SAVINGS_ACCOUNT;
-            case "CURRENT_ACCOUNT":
+            case "CUENTA CORRIENTE":
                 return BankAccountTypeEnum.CURRENT_ACCOUNT;
             default:
                 return null;

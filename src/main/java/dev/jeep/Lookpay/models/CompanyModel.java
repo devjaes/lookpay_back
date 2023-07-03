@@ -30,8 +30,11 @@ public class CompanyModel {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private UserModel user;
 
-    @ManyToMany()
-    @JoinTable(name = "company_bank_accounts", joinColumns = @JoinColumn(name = "company_id"), inverseJoinColumns = @JoinColumn(name = "bank_account_id"))
-    private List<BankCoopAccountModel> bankAccounts;
+    @OneToMany()
+    @JoinColumn(name = "company_id", referencedColumnName = "id")
+    private List<PaymentMethodModel> paymentMethods;
 
+    @OneToOne()
+    @JoinColumn(name = "prefered_account_id", referencedColumnName = "id")
+    private PaymentMethodModel preferedAccount;
 }

@@ -39,7 +39,7 @@ public class CompanyService {
             }
 
             CompanyModel newCompany = new CompanyModel(null, userDto.getDni_ruc(),
-                    Date.valueOf(userDto.getOriginDate()), null, null);
+                    Date.valueOf(userDto.getOriginDate()), null, null, null);
 
             ResponseEntity<LinkedHashMap<String, Object>> userResponse = userService.register(userDto);
 
@@ -151,6 +151,14 @@ public class CompanyService {
         response.put("companies", companiesDto);
 
         return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+    }
+
+    public CompanyModel getByRuc(String ruc) {
+        return companyRepository.getByRuc(ruc);
+    }
+
+    public CompanyModel getById(Long id) {
+        return companyRepository.findById(id).get();
     }
 
 }

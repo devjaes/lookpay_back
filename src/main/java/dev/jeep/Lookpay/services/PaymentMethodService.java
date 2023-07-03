@@ -350,8 +350,8 @@ public class PaymentMethodService {
             }
 
             PaymentMethodModel paymentMethod = card.getPaymentMethod();
-            cdCardRepository.delete(card);
             paymentMethodRepository.delete(paymentMethod);
+            cdCardRepository.delete(card);
 
             return true;
 
@@ -416,8 +416,8 @@ public class PaymentMethodService {
             }
 
             PaymentMethodModel paymentMethod = bankAccount.getPaymentMethod();
-            bankCoopAccountRepository.delete(bankAccount);
             paymentMethodRepository.delete(paymentMethod);
+            bankCoopAccountRepository.delete(bankAccount);
 
             return true;
 
@@ -428,6 +428,10 @@ public class PaymentMethodService {
 
     public List<PaymentMethodModel> getAllPaymentMethods() {
         return paymentMethodRepository.findAll();
+    }
+
+    public List<CDCardModel> getAllCCards(Long clientId) {
+        return cdCardRepository.findCDCardsByClientId(clientId);
     }
 
     public CDCardModel getCardById(Long id) {
@@ -445,4 +449,5 @@ public class PaymentMethodService {
     public PaymentMethodModel getPaymentMethodById(Long id) {
         return paymentMethodRepository.findById(id).orElse(null);
     }
+
 }

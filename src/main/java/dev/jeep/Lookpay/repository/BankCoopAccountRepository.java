@@ -16,4 +16,13 @@ public interface BankCoopAccountRepository extends JpaRepository<BankCoopAccount
 
     @Query(value = "SELECT cd.id, cd.balance, cd.card_holder_name, cd.card_type, cd.ccv, cd.expiration_date, cd.\"number\" FROM cd_cards cd inner join payment_methods p on p.cd_card_id = cd.id WHERE p.client_id =:clientId and cd.card_type = 'DEBIT_CARD'", nativeQuery = true)
     List<BankCoopAccountModel> findBCCByClientId(@Param("clientId") Long clientId);
+
+    @Query(value = "SELECT cd.id, cd.balance, cd.card_holder_name, cd.card_type, cd.ccv, cd.expiration_date, cd.\"number\" FROM cd_cards cd inner join payment_methods p on p.cd_card_id = cd.id WHERE p.client_id =:clientId and cd.card_type = 'DEBIT_CARD'", nativeQuery = true)
+    List<BankCoopAccountModel> findBSCByClientId(@Param("clientId") Long clientId);
+
+    @Query(value = "SELECT cd.id, cd.balance, cd.card_holder_name, cd.card_type, cd.ccv, cd.expiration_date, cd.\"number\" FROM cd_cards cd inner join payment_methods p on p.cd_card_id = cd.id WHERE p.client_id =:clientId and cd.card_type = 'DEBIT_CARD'", nativeQuery = true)
+    List<BankCoopAccountModel> findBCCByCompanyId(@Param("clientId") Long clientId);
+
+    @Query(value = "SELECT cd.id, cd.balance, cd.card_holder_name, cd.card_type, cd.ccv, cd.expiration_date, cd.\"number\" FROM cd_cards cd inner join payment_methods p on p.cd_card_id = cd.id WHERE p.client_id =:clientId and cd.card_type = 'DEBIT_CARD'", nativeQuery = true)
+    List<BankCoopAccountModel> findBSCByCompanyId(@Param("clientId") Long clientId);
 }

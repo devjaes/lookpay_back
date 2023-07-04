@@ -305,9 +305,9 @@ public class ClientService {
 
             if (paymentMethod == null) {
                 response.put("message", "Client has no prefered payment method");
-                response.put("status", HttpStatus.NOT_FOUND.value());
+                response.put("status", HttpStatus.NO_CONTENT.value());
 
-                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NO_CONTENT);
             }
 
             if (paymentMethod.getCdCard() != null) {
@@ -351,9 +351,9 @@ public class ClientService {
             }
 
             response.put("message", "Client has no prefered payment method");
-            response.put("status", HttpStatus.NOT_FOUND.value());
+            response.put("status", HttpStatus.NO_CONTENT.value());
 
-            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NO_CONTENT);
 
         } catch (Exception e) {
             response.put("message", "Error getting prefered payment method for client");

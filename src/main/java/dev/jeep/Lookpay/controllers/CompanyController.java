@@ -27,7 +27,7 @@ public class CompanyController {
         return companyService.register(userDto);
     }
 
-    @GetMapping()
+    @GetMapping("/all")
     public ResponseEntity<LinkedHashMap<String, Object>> getAll() {
         return companyService.getAll();
     }

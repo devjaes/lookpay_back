@@ -19,14 +19,18 @@ import dev.jeep.Lookpay.repository.PaymentRepository;
 
 @Service
 public class PaymentService {
-    @Autowired
-    private PaymentMethodService paymentMethodService;
 
     @Autowired
     private ClientService clientService;
 
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private BankAccountService bankCoopAccountService;
+
+    @Autowired
+    private CardService cardService;
 
     public ResponseEntity<LinkedHashMap<String, Object>> responseCreatePayment(PaymentCreationDTO payment) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
@@ -35,19 +39,19 @@ public class PaymentService {
             PaymentModel newPayment = createPayment(payment);
 
             if (newPayment == null) {
-                response.put("message", "Error al crear el pago");
+                response.put("message", "Payment creation error");
                 response.put("status", 400);
                 response.put("error", "error aqui");
                 return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
             }
 
-            response.put("message", "Pago creado correctamente");
+            response.put("message", "Payment created successfully");
             response.put("status", 201);
             response.put("payment", newPayment);
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
 
         } catch (Exception e) {
-            response.put("message", "Error al crear el pago");
+            response.put("message", "Payment creation error");
             response.put("status", 400);
             response.put("error", e.getMessage());
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
@@ -58,7 +62,7 @@ public class PaymentService {
     public PaymentModel createPayment(PaymentCreationDTO payment) {
         try {
             ClientModel client = clientService.getByDni(payment.getClientDNI());
-            BankCoopAccountModel companyBankAccount = paymentMethodService.getBankAccountByNumber(
+            BankCoopAccountModel companyBankAccount = bankCoopAccountService.getBankAccountByNumber(
                     payment.getCompanyAccountNumber());
 
             if (companyBankAccount == null) {
@@ -107,8 +111,8 @@ public class PaymentService {
 
                             companyBankAccount.setBalance(companyBankAccount.getBalance() + payment.getAmount());
 
-                            paymentMethodService.updateBankAccount(companyBankAccount);
-                            paymentMethodService.updateCard(card);
+                            bankCoopAccountService.updateBankAccount(companyBankAccount);
+                            cardService.updateCard(card);
 
                             return paymentRepository.save(newPayment);
                         }
@@ -135,9 +139,9 @@ public class PaymentService {
 
                             companyBankAccount.setBalance(companyBankAccount.getBalance() + payment.getAmount());
 
-                            paymentMethodService.updateBankAccount(companyBankAccount);
+                            bankCoopAccountService.updateBankAccount(companyBankAccount);
 
-                            paymentMethodService.updateBankAccount(bankAccount);
+                            bankCoopAccountService.updateBankAccount(bankAccount);
 
                             return paymentRepository.save(newPayment);
                         }
@@ -169,9 +173,9 @@ public class PaymentService {
 
                         companyBankAccount.setBalance(companyBankAccount.getBalance() + payment.getAmount());
 
-                        paymentMethodService.updateBankAccount(companyBankAccount);
+                        bankCoopAccountService.updateBankAccount(companyBankAccount);
 
-                        paymentMethodService.updateCard(card);
+                        cardService.updateCard(card);
 
                         return paymentRepository.save(newPayment);
                     }
@@ -198,11 +202,11 @@ public class PaymentService {
                         newPayment.setClientAccountName(preferedAccount.getName());
                         newPayment.setClientAccountNumber(bankAccount.getAccountNumber());
 
-                        paymentMethodService.updateBankAccount(bankAccount);
+                        bankCoopAccountService.updateBankAccount(bankAccount);
 
                         companyBankAccount.setBalance(companyBankAccount.getBalance() + payment.getAmount());
 
-                        paymentMethodService.updateBankAccount(companyBankAccount);
+                        bankCoopAccountService.updateBankAccount(companyBankAccount);
 
                         return paymentRepository.save(newPayment);
                     }
@@ -216,6 +220,60 @@ public class PaymentService {
         } catch (Exception e) {
             System.out.println("================================+++========================" + e.getMessage());
             return null;
+        }
+    }
+
+    public ResponseEntity<LinkedHashMap<String, Object>> getPaymentByClientDNI(String clientDNI) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+
+        try {
+            List<PaymentModel> payments = paymentRepository.findByClientDNI(clientDNI);
+
+            if (payments.size() == 0) {
+                response.put("message", "Payments not found");
+                response.put("status", HttpStatus.NOT_FOUND.value());
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+
+            response.put("message", "Payments found");
+            response.put("status", HttpStatus.OK.value());
+            response.put("payments", payments);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            response.put("message", "Internal server error");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public ResponseEntity<LinkedHashMap<String, Object>> getPaymentByCompanyRUC(String companyRuc) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+
+        try {
+            List<PaymentModel> payments = paymentRepository.findByCompanyRuc(companyRuc);
+
+            if (payments.size() == 0) {
+                response.put("message", "Payments not found");
+                response.put("status", HttpStatus.NOT_FOUND.value());
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+
+            response.put("message", "Payments found");
+            response.put("status", HttpStatus.OK.value());
+            response.put("payments", payments);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            response.put("message", "Internal server error");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

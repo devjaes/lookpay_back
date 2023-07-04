@@ -13,6 +13,6 @@ public class CardResponseDTO {
     private String number;
     private String cardType;
     private String cardHolderName;
-    private String ccv;
+    private String cvv;
     private String expirationDate;
 }

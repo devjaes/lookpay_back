@@ -1,7 +1,5 @@
 package dev.jeep.Lookpay.models;
 
-import java.sql.Date;
-
 import org.springframework.format.annotation.DateTimeFormat;
 
 import dev.jeep.Lookpay.enums.CardTypeEnum;
@@ -33,7 +31,7 @@ public class CDCardModel {
     private String cardHolderName;
 
     @Column(nullable = false)
-    private String ccv;
+    private String cvv;
 
     @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM")

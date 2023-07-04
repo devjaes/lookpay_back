@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class PaymentsMethodsResponse {
+public class PaymentsMethodsResponseDTO {
     private List<BankCoopAccountResponseDTO> bankCoopCurrentsAccounts;
     private List<BankCoopAccountResponseDTO> bankCoopSavingsAccounts;
     private List<CardResponseDTO> debitCards;

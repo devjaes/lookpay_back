@@ -1,6 +1,6 @@
 package dev.jeep.Lookpay.services;
 
-import java.sql.Date;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import dev.jeep.Lookpay.dtos.BankCoopAccountResponseDTO;
 import dev.jeep.Lookpay.dtos.CardResponseDTO;
 import dev.jeep.Lookpay.dtos.PaymentMethodRegisterDTO;
+import dev.jeep.Lookpay.dtos.PaymentsMethodsResponseDTO;
 import dev.jeep.Lookpay.enums.BankAccountTypeEnum;
 import dev.jeep.Lookpay.enums.BankCoopEnum;
 import dev.jeep.Lookpay.enums.CardTypeEnum;
@@ -48,6 +49,12 @@ public class PaymentMethodService {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private CardService cardService;
+
+    @Autowired
+    private BankAccountService bankAccountService;
 
     public ResponseEntity<LinkedHashMap<String, Object>> register(PaymentMethodRegisterDTO paymentMethodDto) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
@@ -98,13 +105,13 @@ public class PaymentMethodService {
                     CardResponseDTO cardResponse = new CardResponseDTO(createdPMethod.getCdCard().getId(),
                             createdPMethod.getName(), createdPMethod.getCdCard().getNumber(),
                             createdPMethod.getCdCard().getCardType().toString(),
-                            createdPMethod.getCdCard().getCardHolderName(), createdPMethod.getCdCard().getCcv(),
+                            createdPMethod.getCdCard().getCardHolderName(), createdPMethod.getCdCard().getCvv(),
                             createdPMethod.getCdCard().getExpirationDate().toString());
 
                     response.put("message", "Card created successfully");
 
                     response.put("status", HttpStatus.CREATED.value());
-                    response.put("card", cardResponse);
+                    response.put("account", cardResponse);
 
                     return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.CREATED);
                 } else {
@@ -187,8 +194,6 @@ public class PaymentMethodService {
                 accountResponse.setAccountPassword(createdPMethod.getBankAccount().getAccountPassword());
 
                 response.put("message", "Account created successfully");
-                response.put("company", company.getRuc());
-                response.put("company2", paymentMethod.getCompanyId().getRuc());
 
                 response.put("status", HttpStatus.CREATED.value());
                 response.put("account", accountResponse);
@@ -210,14 +215,14 @@ public class PaymentMethodService {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
         try {
-            CDCardModel cdCard = this.getCardById(card.getId());
+            CDCardModel cdCard = cardService.getCardById(card.getId());
 
             if (cdCard == null) {
                 response.put("message", "Card not found");
                 response.put("status", HttpStatus.BAD_REQUEST.value());
             }
 
-            CDCardModel updateCard = this.updateCard(card);
+            CDCardModel updateCard = cardService.updateCard(card);
 
             if (updateCard == null) {
                 response.put("message", "Error updating card");
@@ -231,7 +236,7 @@ public class PaymentMethodService {
             cardResponse.setName(updateCard.getPaymentMethod().getName());
             cardResponse.setCardHolderName(updateCard.getCardHolderName());
             cardResponse.setCardType(updateCard.getCardType().toString());
-            cardResponse.setCcv(updateCard.getCcv());
+            cardResponse.setCvv(updateCard.getCvv());
             cardResponse.setExpirationDate(updateCard.getExpirationDate().toString());
             cardResponse.setNumber(updateCard.getNumber());
 
@@ -253,7 +258,7 @@ public class PaymentMethodService {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
         try {
-            BankCoopAccountModel bankAccount = this.getAccountById(account.getId());
+            BankCoopAccountModel bankAccount = bankAccountService.getAccountById(account.getId());
 
             if (bankAccount == null) {
                 response.put("message", "Bank account not found");
@@ -262,7 +267,7 @@ public class PaymentMethodService {
                 return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
             }
 
-            BankCoopAccountModel updateAccount = this.updateBankAccount(account);
+            BankCoopAccountModel updateAccount = bankAccountService.updateBankAccount(account);
 
             if (updateAccount == null) {
                 response.put("message", "Error updating bank account");
@@ -296,154 +301,251 @@ public class PaymentMethodService {
         }
     }
 
-    public List<CDCardModel> getAllUserCards(Long clientId) {
-        return cdCardRepository.findAllByClientId(clientId);
-    }
+    public ResponseEntity<LinkedHashMap<String, Object>> deletePaymentMethod(Long id, String type) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-    public CDCardModel updateCard(CDCardModel card) {
-        return cdCardRepository.save(card);
-    }
-
-    public CDCardModel updateCard(CardResponseDTO card) {
         try {
-            CDCardModel cdCard = this.getCardById(card.getId());
+            if (type.equals("CARD")) {
+                PaymentMethodModel clientPreferedPaymentMethod = cardService.getCardById(id).getPaymentMethod()
+                        .getClient().getPreferedAccount();
 
-            if (cdCard == null) {
-                return null;
+                if (clientPreferedPaymentMethod != null) {
+                    ClientModel client = clientPreferedPaymentMethod.getClient();
+                    client.setPreferedAccount(null);
+
+                    clientRepository.save(client);
+                }
+
+                if (cardService.deleteCard(id)) {
+                    response.put("message", "Card deleted successfully");
+                    response.put("status", HttpStatus.OK.value());
+
+                    return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+                }
+
+                response.put("message", "Error deleting card");
+                response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            PaymentMethodModel paymentMethod = cdCard.getPaymentMethod();
+            if (type.equals("ACCOUNT")) {
+                PaymentMethodModel preferedPaymentMethod = bankAccountService.getAccountById(id).getPaymentMethod()
+                        .getClient().getPreferedAccount();
 
-            if (card.getName() != "")
-                paymentMethod.setName(card.getName());
+                if (preferedPaymentMethod != null) {
+                    ClientModel client = preferedPaymentMethod.getClient();
+                    client.setPreferedAccount(null);
 
-            if (card.getCardHolderName() != "")
-                cdCard.setCardHolderName(card.getCardHolderName());
+                    clientRepository.save(client);
+                }
 
-            if (card.getCardType() != "")
-                cdCard.setCardType(CardTypeEnum.fromString(card.getCardType()));
+                preferedPaymentMethod = bankAccountService.getAccountById(id).getPaymentMethod().getCompany()
+                        .getPreferedAccount();
 
-            if (card.getCcv() != "")
-                cdCard.setCcv(card.getCcv());
+                if (preferedPaymentMethod != null) {
+                    CompanyModel company = preferedPaymentMethod.getCompany();
+                    company.setPreferedAccount(null);
 
-            if (card.getExpirationDate() != "")
-                cdCard.setExpirationDate(card.getExpirationDate());
+                    companyRepository.save(company);
+                }
 
-            if (card.getNumber() != "")
-                cdCard.setNumber(card.getNumber());
+                if (bankAccountService.deleteBankAccount(id)) {
+                    response.put("message", "Bank account deleted successfully");
+                    response.put("status", HttpStatus.OK.value());
 
-            paymentMethodRepository.save(paymentMethod);
-            return cdCardRepository.save(cdCard);
+                    return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+                }
+
+                response.put("message", "Error deleting bank account");
+                response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            response.put("message", "Error deleting payment method");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+            response.put("error", "Invalid type");
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 
         } catch (Exception e) {
-            System.out.println("=======================" + e.getMessage());
-            return null;
+            response.put("message", "Error deleting payment method");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public boolean deleteCard(Long id) {
-        try {
-            CDCardModel card = this.getCardById(id);
+    public ResponseEntity<LinkedHashMap<String, Object>> getTypePaymentMethodsByClientId(Long clientID) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-            if (card == null) {
-                return false;
+        if (clientID == null) {
+            response.put("message", "Client ID is null");
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            List<CDCardModel> cCards = cardService.getAllCCardsByClientId(clientID);
+            List<CDCardModel> dCards = cardService.getAllDCardsByClientId(clientID);
+            List<BankCoopAccountModel> cAccounts = bankAccountService.getAllCAccountByClientId(clientID);
+            List<BankCoopAccountModel> sAccounts = bankAccountService.getAllSAccountByClientId(clientID);
+
+            List<CardResponseDTO> cCardsDTO = new ArrayList<>();
+            List<CardResponseDTO> dCardsDTO = new ArrayList<>();
+            List<BankCoopAccountResponseDTO> cAccountsDTO = new ArrayList<>();
+            List<BankCoopAccountResponseDTO> sAccountsDTO = new ArrayList<>();
+
+            for (CDCardModel card : cCards) {
+                CardResponseDTO CardResponseDTO = new CardResponseDTO();
+                CardResponseDTO.setId(card.getId());
+                CardResponseDTO.setName(card.getPaymentMethod().getName());
+                CardResponseDTO.setNumber(card.getNumber());
+                CardResponseDTO.setCardType(card.getCardType().toString());
+                CardResponseDTO.setCardHolderName(card.getCardHolderName());
+                CardResponseDTO.setCvv(card.getCvv());
+                CardResponseDTO.setExpirationDate(card.getExpirationDate());
+
+                cCardsDTO.add(CardResponseDTO);
             }
 
-            PaymentMethodModel paymentMethod = card.getPaymentMethod();
-            paymentMethodRepository.delete(paymentMethod);
-            cdCardRepository.delete(card);
+            for (CDCardModel card : dCards) {
+                CardResponseDTO CardResponseDTO = new CardResponseDTO();
+                CardResponseDTO.setId(card.getId());
+                CardResponseDTO.setName(card.getPaymentMethod().getName());
+                CardResponseDTO.setNumber(card.getNumber());
+                CardResponseDTO.setCardType(card.getCardType().toString());
+                CardResponseDTO.setCardHolderName(card.getCardHolderName());
+                CardResponseDTO.setCvv(card.getCvv());
+                CardResponseDTO.setExpirationDate(card.getExpirationDate());
 
-            return true;
+                dCardsDTO.add(CardResponseDTO);
+            }
+
+            for (BankCoopAccountModel account : cAccounts) {
+                BankCoopAccountResponseDTO bankCoopAccountResponseDTO = new BankCoopAccountResponseDTO();
+                bankCoopAccountResponseDTO.setId(account.getId());
+                bankCoopAccountResponseDTO.setName(account.getPaymentMethod().getName());
+                bankCoopAccountResponseDTO.setNumber(account.getAccountNumber());
+                bankCoopAccountResponseDTO.setAccountType(account.getAccountType().toString());
+                bankCoopAccountResponseDTO.setBankName(account.getBankName().toString());
+                bankCoopAccountResponseDTO.setAccountHolderName(account.getAccountHolderName());
+                bankCoopAccountResponseDTO.setAccountHolderDNI(account.getAccountHolderDNI());
+                bankCoopAccountResponseDTO.setAccountHolderEmail(account.getAccountHolderEmail());
+                bankCoopAccountResponseDTO.setAccountPassword(account.getAccountPassword());
+
+                cAccountsDTO.add(bankCoopAccountResponseDTO);
+            }
+
+            for (BankCoopAccountModel account : sAccounts) {
+                BankCoopAccountResponseDTO bankCoopAccountResponseDTO = new BankCoopAccountResponseDTO();
+                bankCoopAccountResponseDTO.setId(account.getId());
+                bankCoopAccountResponseDTO.setName(account.getPaymentMethod().getName());
+                bankCoopAccountResponseDTO.setNumber(account.getAccountNumber());
+                bankCoopAccountResponseDTO.setAccountType(account.getAccountType().toString());
+                bankCoopAccountResponseDTO.setBankName(account.getBankName().toString());
+                bankCoopAccountResponseDTO.setAccountHolderName(account.getAccountHolderName());
+                bankCoopAccountResponseDTO.setAccountHolderDNI(account.getAccountHolderDNI());
+                bankCoopAccountResponseDTO.setAccountHolderEmail(account.getAccountHolderEmail());
+                bankCoopAccountResponseDTO.setAccountPassword(account.getAccountPassword());
+
+                sAccountsDTO.add(bankCoopAccountResponseDTO);
+            }
+
+            PaymentsMethodsResponseDTO paymentMethods = new PaymentsMethodsResponseDTO();
+
+            paymentMethods.setCreditCards(cCardsDTO);
+            paymentMethods.setDebitCards(dCardsDTO);
+            paymentMethods.setBankCoopCurrentsAccounts(cAccountsDTO);
+            paymentMethods.setBankCoopSavingsAccounts(sAccountsDTO);
+
+            response.put("message", "Payment methods found");
+            response.put("status", HttpStatus.OK.value());
+            response.put("paymentMethods", paymentMethods);
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
 
         } catch (Exception e) {
-            return false;
+            response.put("message", "Error getting payment methods");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            response.put("error", e.getMessage());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    public BankCoopAccountModel updateBankAccount(BankCoopAccountModel account) {
-        return bankCoopAccountRepository.save(account);
-    }
+    public ResponseEntity<LinkedHashMap<String, Object>> getTypePaymentMethodsByCompanyId(Long companyID) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-    public BankCoopAccountModel updateBankAccount(BankCoopAccountResponseDTO account) {
-        try {
-            BankCoopAccountModel bankAccount = this.getAccountById(account.getId());
+        if (companyID == null) {
+            response.put("message", "Company ID is null");
+            response.put("status", HttpStatus.BAD_REQUEST.value());
 
-            if (bankAccount == null) {
-                return null;
-            }
-
-            PaymentMethodModel paymentMethod = bankAccount.getPaymentMethod();
-
-            if (account.getName() != "")
-                paymentMethod.setName(account.getName());
-
-            if (account.getAccountHolderName() != "")
-                bankAccount.setAccountHolderName(account.getAccountHolderName());
-
-            if (account.getAccountHolderDNI() != "")
-                bankAccount.setAccountHolderDNI(account.getAccountHolderDNI());
-
-            if (account.getAccountHolderEmail() != "")
-                bankAccount.setAccountHolderEmail(account.getAccountHolderEmail());
-
-            if (account.getNumber() != "")
-                bankAccount.setAccountNumber(account.getNumber());
-
-            if (account.getAccountType() != "")
-                bankAccount.setAccountType(BankAccountTypeEnum.fromString(account.getAccountType()));
-
-            if (account.getBankName() != "")
-                bankAccount.setBankName(BankCoopEnum.fromString(account.getBankName()));
-
-            if (account.getAccountPassword() != "")
-                bankAccount.setAccountPassword(account.getAccountPassword());
-
-            paymentMethodRepository.save(paymentMethod);
-            return bankCoopAccountRepository.save(bankAccount);
-
-        } catch (Exception e) {
-            System.out.println("=======================" + e.getMessage());
-            return null;
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
         }
-    }
 
-    public boolean deleteBankAccount(Long id) {
         try {
-            BankCoopAccountModel bankAccount = this.getAccountById(id);
+            List<BankCoopAccountModel> cAccounts = bankAccountService.getAllCAccountByCompanyId(companyID);
+            List<BankCoopAccountModel> sAccounts = bankAccountService.getAllSAccountByCompanyId(companyID);
 
-            if (bankAccount == null) {
-                return false;
+            List<BankCoopAccountResponseDTO> cAccountsDTO = new ArrayList<>();
+            List<BankCoopAccountResponseDTO> sAccountsDTO = new ArrayList<>();
+
+            for (BankCoopAccountModel account : cAccounts) {
+                BankCoopAccountResponseDTO bankCoopAccountResponseDTO = new BankCoopAccountResponseDTO();
+                bankCoopAccountResponseDTO.setId(account.getId());
+                bankCoopAccountResponseDTO.setName(account.getPaymentMethod().getName());
+                bankCoopAccountResponseDTO.setNumber(account.getAccountNumber());
+                bankCoopAccountResponseDTO.setAccountType(account.getAccountType().toString());
+                bankCoopAccountResponseDTO.setBankName(account.getBankName().toString());
+                bankCoopAccountResponseDTO.setAccountHolderName(account.getAccountHolderName());
+                bankCoopAccountResponseDTO.setAccountHolderDNI(account.getAccountHolderDNI());
+                bankCoopAccountResponseDTO.setAccountHolderEmail(account.getAccountHolderEmail());
+                bankCoopAccountResponseDTO.setAccountPassword(account.getAccountPassword());
+
+                cAccountsDTO.add(bankCoopAccountResponseDTO);
             }
 
-            PaymentMethodModel paymentMethod = bankAccount.getPaymentMethod();
-            paymentMethodRepository.delete(paymentMethod);
-            bankCoopAccountRepository.delete(bankAccount);
+            for (BankCoopAccountModel account : sAccounts) {
+                BankCoopAccountResponseDTO bankCoopAccountResponseDTO = new BankCoopAccountResponseDTO();
+                bankCoopAccountResponseDTO.setId(account.getId());
+                bankCoopAccountResponseDTO.setName(account.getPaymentMethod().getName());
+                bankCoopAccountResponseDTO.setNumber(account.getAccountNumber());
+                bankCoopAccountResponseDTO.setAccountType(account.getAccountType().toString());
+                bankCoopAccountResponseDTO.setBankName(account.getBankName().toString());
+                bankCoopAccountResponseDTO.setAccountHolderName(account.getAccountHolderName());
+                bankCoopAccountResponseDTO.setAccountHolderDNI(account.getAccountHolderDNI());
+                bankCoopAccountResponseDTO.setAccountHolderEmail(account.getAccountHolderEmail());
+                bankCoopAccountResponseDTO.setAccountPassword(account.getAccountPassword());
 
-            return true;
+                sAccountsDTO.add(bankCoopAccountResponseDTO);
+            }
+
+            PaymentsMethodsResponseDTO paymentMethods = new PaymentsMethodsResponseDTO();
+
+            paymentMethods.setBankCoopCurrentsAccounts(cAccountsDTO);
+            paymentMethods.setBankCoopSavingsAccounts(sAccountsDTO);
+
+            response.put("message", "Payment methods found");
+            response.put("status", HttpStatus.OK.value());
+            response.put("paymentMethods", paymentMethods);
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
 
         } catch (Exception e) {
-            return false;
+            response.put("message", "Error getting payment methods");
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     public List<PaymentMethodModel> getAllPaymentMethods() {
         return paymentMethodRepository.findAll();
-    }
-
-    public List<CDCardModel> getAllCCards(Long clientId) {
-        return cdCardRepository.findCDCardsByClientId(clientId);
-    }
-
-    public CDCardModel getCardById(Long id) {
-        return cdCardRepository.findById(id).orElse(null);
-    }
-
-    public BankCoopAccountModel getAccountById(Long id) {
-        return bankCoopAccountRepository.findById(id).orElse(null);
-    }
-
-    public BankCoopAccountModel getBankAccountByNumber(String number) {
-        return bankCoopAccountRepository.findByNumber(number);
     }
 
     public PaymentMethodModel getPaymentMethodById(Long id) {

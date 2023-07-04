@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class PaymentResponseDTO {
+    private Long id;
     private String name;
     private Double amount;
     private String description;
@@ -12,8 +13,8 @@ public class PaymentResponseDTO {
     private String companyRuc;
     private String companyAccountName;
     private String companyAccountNumber;
-    private String customerName;
-    private String customerDNI;
-    private String customerAccountName;
-    private String customerAccountNumber;
+    private String clientName;
+    private String clientDNI;
+    private String clientAccountName;
+    private String clientAccountNumber;
 }

@@ -196,7 +196,10 @@ public class ClientService {
                 bankCoopAccountService.deleteBankAccount(account.getId());
             }
 
+            UserModel user = client.getUser();
+
             clientRepository.delete(client);
+            userRepository.delete(user);
 
             response.put("message", "Client deleted successfully");
             response.put("status", HttpStatus.OK.value());

@@ -8,10 +8,9 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class UserUpdateDTO {
-    private String rol;
+    private String email;
     private String phoneNumber;
     private String password;
-    private String email;
     private String address;
     private Long cityId;
 }

@@ -183,4 +183,7 @@ $RECYCLE.BIN/
 #env
 .env
 
+#certificates
+*.crt
+
 # End of https://www.toptal.com/developers/gitignore/api/java,windows,macos,linux,react,web,git

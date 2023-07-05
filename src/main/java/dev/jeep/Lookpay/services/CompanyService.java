@@ -141,7 +141,7 @@ public class CompanyService {
         Iterable<CompanyModel> companies = companyRepository.findAll();
 
         if (companies == null) {
-            response.put("message", "Companys not found");
+            response.put("message", "Companies not found");
             response.put("status", HttpStatus.NOT_FOUND.value());
 
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -180,7 +180,10 @@ public class CompanyService {
                 bankCoopAccountService.deleteBankAccount(account.getId());
             }
 
+            UserModel user = company.getUser();
+
             companyRepository.delete(company);
+            userRepository.delete(user);
 
             response.put("message", "Company deleted successfully");
             response.put("status", HttpStatus.OK.value());

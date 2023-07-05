@@ -11,9 +11,9 @@ import dev.jeep.Lookpay.models.PaymentModel;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<PaymentModel, Long> {
-    @Query(value = "SELECT * FROM payment WHERE company_ruc = :companyRuc", nativeQuery = true)
+    @Query(value = "SELECT * FROM payments WHERE company_ruc = :companyRuc", nativeQuery = true)
     List<PaymentModel> findByCompanyRuc(@Param("companyRuc") String companyRuc);
 
-    @Query(value = "SELECT * FROM payment WHERE clientdni=:clientDNI", nativeQuery = true)
+    @Query(value = "SELECT * FROM payments WHERE clientdni=:clientDNI", nativeQuery = true)
     List<PaymentModel> findByClientDNI(@Param("clientDNI") String clientDNI);
 }

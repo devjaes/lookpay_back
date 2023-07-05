@@ -1,5 +1,6 @@
 package dev.jeep.Lookpay.services;
 
+import java.sql.Date;
 import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +10,14 @@ import org.springframework.stereotype.Service;
 
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
+import dev.jeep.Lookpay.dtos.ResetPasswordDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
 import dev.jeep.Lookpay.dtos.UserResponseDTO;
 import dev.jeep.Lookpay.dtos.UserUpdateDTO;
 import dev.jeep.Lookpay.enums.RolEnum;
 import dev.jeep.Lookpay.models.CityModel;
+import dev.jeep.Lookpay.models.ClientModel;
+import dev.jeep.Lookpay.models.CompanyModel;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.CityRepository;
 import dev.jeep.Lookpay.repository.ClientRepository;
@@ -126,13 +130,78 @@ public class UserService {
 
     public ResponseEntity<LinkedHashMap<String, Object>> update(Long userId, UserUpdateDTO userUpdate) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
-        UserModel user;
 
-        if (RolEnum.getRolEnum(userUpdate.getRol()) == RolEnum.CLIENT) {
-            user = clientRepository.findById(userId).get().getUser();
-        } else {
-            user = companyRepository.findById(userId).get().getUser();
+        UserModel user = userRepository.getByEmail(userUpdate.getEmail());
+        try {
+
+            if (user == null) {
+                response.put("message", "User not found");
+                response.put("status", HttpStatus.NOT_FOUND.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+            }
+
+            if (userUpdate.getPhoneNumber() != "") {
+                user.setPhoneNumber(userUpdate.getPhoneNumber());
+            }
+
+            if (userUpdate.getPassword() != "" && userUpdate.getPassword() != null) {
+                Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
+                String hash = argon2.hash(1, 1024, 1, userUpdate.getPassword());
+                user.setPassword(hash);
+            }
+
+            if (userUpdate.getEmail() != "" && userUpdate.getEmail() != null) {
+                if (!userUpdate.getEmail().equals(user.getEmail())) {
+
+                    if (this.validateIfExists(userUpdate.getEmail())) {
+                        response.put("message", "Email already exist");
+                        response.put("status", HttpStatus.BAD_REQUEST.value());
+
+                        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+                    }
+                }
+                user.setEmail(userUpdate.getEmail());
+            }
+
+            if (userUpdate.getAddress() != "" && userUpdate.getAddress() != null) {
+                user.setAddress(userUpdate.getAddress());
+            }
+
+            if (userUpdate.getCityId() != null || userUpdate.getCityId() != 0) {
+                user.setCity(cityRepository.findById(userUpdate.getCityId()).get());
+            }
+
+            userRepository.save(user);
+
+            LinkedHashMap<String, Object> userResponse = new LinkedHashMap<>();
+            userResponse.put("id", user.getId());
+            userResponse.put("name", user.getName());
+            userResponse.put("email", user.getEmail());
+            userResponse.put("phoneNumber", user.getPhoneNumber());
+            userResponse.put("address", user.getAddress());
+            userResponse.put("city", user.getCity().getName());
+            userResponse.put("province", user.getCity().getProvince().getName());
+
+            response.put("message", "User updated successfully");
+            response.put("status", HttpStatus.OK.value());
+            response.put("user", userResponse);
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            response.put("message", "Error updating user");
+            response.put("error", e.getMessage());
+            response.put("u", user);
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+    }
+
+    public ResponseEntity<LinkedHashMap<String, Object>> resetPassword(ResetPasswordDTO resetPasswordDTO) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+        UserModel user = userRepository.getByEmail(resetPasswordDTO.getEmail());
 
         if (user == null) {
             response.put("message", "User not found");
@@ -141,49 +210,69 @@ public class UserService {
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
-        if (userUpdate.getPhoneNumber() != "") {
-            user.setPhoneNumber(userUpdate.getPhoneNumber());
-        }
+        try {
+            if (resetPasswordDTO.getType().equals("CLIENT")) {
+                ClientModel client = clientRepository.findById(user.getClient().getId()).get();
 
-        if (userUpdate.getPassword() != "") {
-            Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
-            String hash = argon2.hash(1, 1024, 1, userUpdate.getPassword());
-            user.setPassword(hash);
-        }
+                if (client == null) {
+                    response.put("message", "Client not found");
+                    response.put("status", HttpStatus.NOT_FOUND.value());
 
-        if (userUpdate.getEmail() != "") {
-            if (this.validateIfExists(userUpdate.getEmail())) {
-                response.put("message", "Email already exist");
-                response.put("status", HttpStatus.BAD_REQUEST.value());
+                    return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+                }
 
-                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+                if (!client.getDni().equals(resetPasswordDTO.getDni_ruc())
+                        || !client.getBirthDate().equals(Date.valueOf(resetPasswordDTO.getOriginDate()))
+                        || !user.getPhoneNumber().equals(resetPasswordDTO.getPhoneNumber())
+                        || !user.getName().equals(resetPasswordDTO.getName())) {
+
+                    response.put("message", "Invalid data");
+                    response.put("status", HttpStatus.BAD_REQUEST.value());
+
+                    return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+
+                }
+
+                response.put("message", "Password can be reset");
+                response.put("userId", user.getId());
+                response.put("status", HttpStatus.OK.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+
+            } else {
+                CompanyModel company = companyRepository.findById(user.getCompany().getId()).get();
+
+                if (company == null) {
+                    response.put("message", "Company not found");
+                    response.put("status", HttpStatus.NOT_FOUND.value());
+
+                    return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+                }
+
+                if (!company.getRuc().equals(resetPasswordDTO.getDni_ruc())
+                        || !company.getFundationDate().equals(Date.valueOf(resetPasswordDTO.getOriginDate()))
+                        || !user.getPhoneNumber().equals(resetPasswordDTO.getPhoneNumber())
+                        || !user.getName().equals(resetPasswordDTO.getName())) {
+
+                    response.put("message", "Invalid data");
+                    response.put("status", HttpStatus.BAD_REQUEST.value());
+
+                    return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+                }
+
+                response.put("message", "Password can be reset");
+                response.put("userId", user.getId());
+                response.put("status", HttpStatus.OK.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
             }
-            user.setEmail(userUpdate.getEmail());
+
+        } catch (Exception e) {
+            response.put("message", "Error ocurred in the server");
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
         }
 
-        if (userUpdate.getAddress() != "") {
-            user.setAddress(userUpdate.getAddress());
-        }
-
-        if (userUpdate.getCityId() != null || userUpdate.getCityId() != 0) {
-            user.setCity(cityRepository.findById(userUpdate.getCityId()).get());
-        }
-
-        userRepository.save(user);
-
-        LinkedHashMap<String, Object> userResponse = new LinkedHashMap<>();
-        userResponse.put("id", user.getId());
-        userResponse.put("name", user.getName());
-        userResponse.put("email", user.getEmail());
-        userResponse.put("phoneNumber", user.getPhoneNumber());
-        userResponse.put("address", user.getAddress());
-        userResponse.put("city", user.getCity().getName());
-        userResponse.put("province", user.getCity().getProvince().getName());
-
-        response.put("message", "User updated successfully");
-        response.put("status", HttpStatus.OK.value());
-        response.put("user", userResponse);
-
-        return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
     }
 }

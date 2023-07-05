@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.jeep.Lookpay.dtos.ResetPasswordDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
 import dev.jeep.Lookpay.dtos.UserUpdateDTO;
 import dev.jeep.Lookpay.services.UserService;
@@ -36,6 +37,11 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<LinkedHashMap<String, Object>> getUser(@PathVariable("id") Long id) {
         return userService.getUser(id);
+    }
+
+    @PostMapping("/resetpassword")
+    public ResponseEntity<LinkedHashMap<String, Object>> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        return userService.resetPassword(resetPasswordDTO);
     }
 
 }

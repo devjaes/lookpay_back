@@ -132,7 +132,7 @@ public class UserService {
     public ResponseEntity<LinkedHashMap<String, Object>> update(Long userId, UserUpdateDTO userUpdate) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
-        UserModel user = userRepository.getByEmail(userUpdate.getEmail());
+        UserModel user = userRepository.getByUserId(userId);
         try {
 
             if (user == null) {
@@ -142,17 +142,17 @@ public class UserService {
                 return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
             }
 
-            if (userUpdate.getPhoneNumber() != "") {
+            if (userUpdate.getPhoneNumber() != null && userUpdate.getPhoneNumber() != "") {
                 user.setPhoneNumber(userUpdate.getPhoneNumber());
             }
 
-            if (userUpdate.getPassword() != "" && userUpdate.getPassword() != null) {
+            if (userUpdate.getPassword() != null && userUpdate.getPassword().equals("")) {
                 Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
                 String hash = argon2.hash(1, 1024, 1, userUpdate.getPassword());
                 user.setPassword(hash);
             }
 
-            if (userUpdate.getEmail() != "" && userUpdate.getEmail() != null) {
+            if (userUpdate.getEmail() != null && userUpdate.getEmail().equals("")) {
                 if (!userUpdate.getEmail().equals(user.getEmail())) {
 
                     if (this.validateIfExists(userUpdate.getEmail())) {
@@ -165,11 +165,11 @@ public class UserService {
                 user.setEmail(userUpdate.getEmail());
             }
 
-            if (userUpdate.getAddress() != "" && userUpdate.getAddress() != null) {
+            if (userUpdate.getAddress() != null && userUpdate.getAddress() != "") {
                 user.setAddress(userUpdate.getAddress());
             }
 
-            if (userUpdate.getCityId() != null || userUpdate.getCityId() != 0) {
+            if (userUpdate.getCityId() != null && userUpdate.getCityId().compareTo(Long.valueOf("0")) != 0) {
                 user.setCity(cityRepository.findById(userUpdate.getCityId()).get());
             }
 
@@ -191,7 +191,8 @@ public class UserService {
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
         } catch (Exception e) {
             response.put("message", "Error updating user");
-            response.put("error", e.getMessage());
+            response.put("error", e.getCause());
+            response.put("user", userUpdate.getCityId().compareTo(Long.valueOf("0")) != 0);
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
 
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

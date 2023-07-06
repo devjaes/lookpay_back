@@ -222,6 +222,13 @@ public class PaymentMethodService {
                 response.put("status", HttpStatus.BAD_REQUEST.value());
             }
 
+            if (cardService.validateIfExistsCard(card.getNumber())) {
+                response.put("message", "Card already exists");
+                response.put("status", HttpStatus.BAD_REQUEST.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            }
+
             CDCardModel updateCard = cardService.updateCard(card);
 
             if (updateCard == null) {
@@ -262,6 +269,13 @@ public class PaymentMethodService {
 
             if (bankAccount == null) {
                 response.put("message", "Bank account not found");
+                response.put("status", HttpStatus.BAD_REQUEST.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            }
+
+            if (bankAccountService.validateIfExistsAccount(account.getNumber())) {
+                response.put("message", "Bank account already exists");
                 response.put("status", HttpStatus.BAD_REQUEST.value());
 
                 return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);

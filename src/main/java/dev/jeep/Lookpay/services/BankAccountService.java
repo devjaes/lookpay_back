@@ -92,6 +92,16 @@ public class BankAccountService {
         }
     }
 
+    public boolean validateIfExistsAccount(String number) {
+        BankCoopAccountModel bankAccount = this.getBankAccountByNumber(number);
+
+        if (bankAccount == null) {
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean deleteBankAccount(Long id) {
         try {
             BankCoopAccountModel bankAccount = this.getAccountById(id);

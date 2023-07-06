@@ -77,6 +77,15 @@ public class CardService {
         }
     }
 
+    public boolean validateIfExistsCard(String number) {
+        try {
+            CDCardModel card = cdCardRepository.findByNumber(number);
+            return card != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public boolean deleteCard(Long id) {
         try {
             CDCardModel card = this.getCardById(id);

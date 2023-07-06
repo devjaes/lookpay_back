@@ -231,8 +231,8 @@ public class PaymentService {
 
             if (payments.size() == 0) {
                 response.put("message", "Payments not found");
-                response.put("status", HttpStatus.NOT_FOUND.value());
-                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                response.put("status", HttpStatus.NO_CONTENT.value());
+                return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
             }
 
             response.put("message", "Payments found");
@@ -258,8 +258,8 @@ public class PaymentService {
 
             if (payments.size() == 0) {
                 response.put("message", "Payments not found");
-                response.put("status", HttpStatus.NOT_FOUND.value());
-                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+                response.put("status", HttpStatus.NO_CONTENT.value());
+                return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
             }
 
             response.put("message", "Payments found");

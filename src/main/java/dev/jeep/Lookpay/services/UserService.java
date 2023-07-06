@@ -192,7 +192,6 @@ public class UserService {
         } catch (Exception e) {
             response.put("message", "Error updating user");
             response.put("error", e.getMessage());
-            response.put("u", user);
             response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
 
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

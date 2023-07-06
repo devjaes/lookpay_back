@@ -14,13 +14,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
+import dev.jeep.Lookpay.dtos.UserUpdateDTO;
+import dev.jeep.Lookpay.models.UserModel;
+import dev.jeep.Lookpay.repository.CompanyRepository;
 import dev.jeep.Lookpay.services.CompanyService;
+import dev.jeep.Lookpay.services.UserService;
 
 @RestController
 @RequestMapping("/company")
 public class CompanyController {
     @Autowired
     private CompanyService companyService;
+
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping()
     public ResponseEntity<LinkedHashMap<String, Object>> redisterCompany(@RequestBody UserRegisterDTO userDto) {
@@ -35,6 +45,26 @@ public class CompanyController {
     @GetMapping("/{id}")
     public ResponseEntity<LinkedHashMap<String, Object>> get(@PathVariable("id") Long id) {
         return companyService.get(id);
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<LinkedHashMap<String, Object>> update(@PathVariable("id") Long id,
+            @RequestBody UserUpdateDTO user) {
+        try {
+            UserModel userModel = companyRepository.findById(id).get().getUser();
+
+            if (userModel == null) {
+                LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+                response.put("message", "User not found");
+
+                return new ResponseEntity<>(response, org.springframework.http.HttpStatus.NOT_FOUND);
+            }
+
+            return userService.update(userModel.getId(), user);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
     }
 
     @GetMapping("/user/{id}")

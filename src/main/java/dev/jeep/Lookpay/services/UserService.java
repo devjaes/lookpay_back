@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import de.mkammerer.argon2.Argon2;
 import de.mkammerer.argon2.Argon2Factory;
 import dev.jeep.Lookpay.dtos.ResetPasswordDTO;
+import dev.jeep.Lookpay.dtos.ResetRequestPasswordDTO;
 import dev.jeep.Lookpay.dtos.UserRegisterDTO;
 import dev.jeep.Lookpay.dtos.UserResponseDTO;
 import dev.jeep.Lookpay.dtos.UserUpdateDTO;
@@ -199,7 +200,8 @@ public class UserService {
 
     }
 
-    public ResponseEntity<LinkedHashMap<String, Object>> resetPassword(ResetPasswordDTO resetPasswordDTO) {
+    public ResponseEntity<LinkedHashMap<String, Object>> resetRequestPassword(
+            ResetRequestPasswordDTO resetPasswordDTO) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
         UserModel user = userRepository.getByEmail(resetPasswordDTO.getEmail());
 
@@ -274,5 +276,38 @@ public class UserService {
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    public ResponseEntity<LinkedHashMap<String, Object>> resetPassword(Long id, ResetPasswordDTO resetPasswordDTO) {
+        LinkedHashMap<String, Object> response = new LinkedHashMap<>();
+
+        UserModel user = userRepository.findById(id).get();
+
+        try {
+            if (user == null) {
+                response.put("message", "User not found");
+                response.put("status", HttpStatus.NOT_FOUND.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+            }
+
+            Argon2 argon2 = Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id);
+            String hash = argon2.hash(1, 1024, 1, resetPasswordDTO.getNewPassword());
+            user.setPassword(hash);
+
+            userRepository.save(user);
+
+            response.put("message", "Password updated successfully");
+            response.put("password", resetPasswordDTO.getNewPassword());
+            response.put("status", HttpStatus.OK.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            response.put("message", "Error ocurred in the server");
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+
+            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
     }
 }

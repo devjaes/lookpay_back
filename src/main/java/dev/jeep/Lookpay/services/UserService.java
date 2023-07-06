@@ -152,7 +152,7 @@ public class UserService {
                 user.setPassword(hash);
             }
 
-            if (userUpdate.getEmail() != null && userUpdate.getEmail().equals("")) {
+            if (userUpdate.getEmail() != null && !userUpdate.getEmail().equals("")) {
                 if (!userUpdate.getEmail().equals(user.getEmail())) {
 
                     if (this.validateIfExists(userUpdate.getEmail())) {

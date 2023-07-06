@@ -50,22 +50,22 @@ public class CardService {
 
             PaymentMethodModel paymentMethod = cdCard.getPaymentMethod();
 
-            if (card.getName() != "")
+            if (card.getName() != null && card.getName() != "")
                 paymentMethod.setName(card.getName());
 
-            if (card.getCardHolderName() != "")
+            if (card.getCardHolderName() != null && card.getCardHolderName() != "")
                 cdCard.setCardHolderName(card.getCardHolderName());
 
-            if (card.getCardType() != "")
+            if (card.getCardType() != null && card.getCardType() != "")
                 cdCard.setCardType(CardTypeEnum.fromString(card.getCardType()));
 
-            if (card.getCvv() != "")
+            if (card.getCvv() != null && card.getCvv() != "")
                 cdCard.setCvv(card.getCvv());
 
-            if (card.getExpirationDate() != "")
+            if (card.getExpirationDate() != null && card.getExpirationDate() != "")
                 cdCard.setExpirationDate(card.getExpirationDate());
 
-            if (card.getNumber() != "")
+            if (card.getNumber() != null && card.getNumber() != "")
                 cdCard.setNumber(card.getNumber());
 
             paymentMethodRepository.save(paymentMethod);

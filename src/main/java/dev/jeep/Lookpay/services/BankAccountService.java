@@ -59,28 +59,28 @@ public class BankAccountService {
 
             PaymentMethodModel paymentMethod = bankAccount.getPaymentMethod();
 
-            if (account.getName() != "")
+            if (account.getName() != null && account.getName() != "")
                 paymentMethod.setName(account.getName());
 
-            if (account.getAccountHolderName() != "")
+            if (account.getAccountHolderName() != null && account.getAccountHolderName() != "")
                 bankAccount.setAccountHolderName(account.getAccountHolderName());
 
-            if (account.getAccountHolderDNI() != "")
+            if (account.getAccountHolderDNI() != null && account.getAccountHolderDNI() != "")
                 bankAccount.setAccountHolderDNI(account.getAccountHolderDNI());
 
-            if (account.getAccountHolderEmail() != "")
+            if (account.getAccountHolderEmail() != null && account.getAccountHolderEmail() != "")
                 bankAccount.setAccountHolderEmail(account.getAccountHolderEmail());
 
-            if (account.getNumber() != "")
+            if (account.getNumber() != null && account.getNumber() != "")
                 bankAccount.setAccountNumber(account.getNumber());
 
-            if (account.getAccountType() != "")
+            if (account.getAccountType() != null && account.getAccountType() != "")
                 bankAccount.setAccountType(BankAccountTypeEnum.fromString(account.getAccountType()));
 
-            if (account.getBankName() != "")
+            if (account.getBankName() != null && account.getBankName() != "")
                 bankAccount.setBankName(BankCoopEnum.fromString(account.getBankName()));
 
-            if (account.getAccountPassword() != "")
+            if (account.getAccountPassword() != null && account.getAccountPassword() != "")
                 bankAccount.setAccountPassword(account.getAccountPassword());
 
             paymentMethodRepository.save(paymentMethod);

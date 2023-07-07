@@ -104,7 +104,7 @@ public class CardService {
 
             if (clientPreferedPaymentMethod != null &&
                     clientPreferedPaymentMethod.getCdCard().getId() == id) {
-                ClientModel client = clientPreferedPaymentMethod.getClient();
+                ClientModel client = clientPreferedPaymentMethod.getClientId();
                 client.setPreferedAccount(null);
 
                 clientRepository.save(client);

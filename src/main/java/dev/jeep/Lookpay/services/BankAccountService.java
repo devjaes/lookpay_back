@@ -121,20 +121,20 @@ public class BankAccountService {
             }
 
             PaymentMethodModel preferedPaymentMethod = this.getAccountById(id).getPaymentMethod()
-                    .getClient().getPreferedAccount();
+                    .getClientId().getPreferedAccount();
 
             if (preferedPaymentMethod != null && preferedPaymentMethod.getBankAccount().getId() == id) {
-                ClientModel client = preferedPaymentMethod.getClient();
+                ClientModel client = preferedPaymentMethod.getClientId();
                 client.setPreferedAccount(null);
 
                 clientRepository.save(client);
             }
 
-            preferedPaymentMethod = this.getAccountById(id).getPaymentMethod().getCompany()
+            preferedPaymentMethod = this.getAccountById(id).getPaymentMethod().getCompanyId()
                     .getPreferedAccount();
 
             if (preferedPaymentMethod != null && preferedPaymentMethod.getBankAccount().getId() == id) {
-                CompanyModel company = preferedPaymentMethod.getCompany();
+                CompanyModel company = preferedPaymentMethod.getCompanyId();
                 company.setPreferedAccount(null);
 
                 companyRepository.save(company);

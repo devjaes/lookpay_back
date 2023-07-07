@@ -9,8 +9,12 @@ import dev.jeep.Lookpay.dtos.BankCoopAccountResponseDTO;
 import dev.jeep.Lookpay.enums.BankAccountTypeEnum;
 import dev.jeep.Lookpay.enums.BankCoopEnum;
 import dev.jeep.Lookpay.models.BankCoopAccountModel;
+import dev.jeep.Lookpay.models.ClientModel;
+import dev.jeep.Lookpay.models.CompanyModel;
 import dev.jeep.Lookpay.models.PaymentMethodModel;
 import dev.jeep.Lookpay.repository.BankCoopAccountRepository;
+import dev.jeep.Lookpay.repository.ClientRepository;
+import dev.jeep.Lookpay.repository.CompanyRepository;
 import dev.jeep.Lookpay.repository.PaymentMethodRepository;
 
 @Service
@@ -20,6 +24,12 @@ public class BankAccountService {
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private CompanyRepository companyRepository;
 
     public List<BankCoopAccountModel> getAllBankAccountsByClientId(Long clientId) {
         return bankCoopAccountRepository.findAllAccountsByClientID(clientId);
@@ -110,6 +120,26 @@ public class BankAccountService {
                 return false;
             }
 
+            PaymentMethodModel preferedPaymentMethod = this.getAccountById(id).getPaymentMethod()
+                    .getClient().getPreferedAccount();
+
+            if (preferedPaymentMethod != null && preferedPaymentMethod.getBankAccount().getId() == id) {
+                ClientModel client = preferedPaymentMethod.getClient();
+                client.setPreferedAccount(null);
+
+                clientRepository.save(client);
+            }
+
+            preferedPaymentMethod = this.getAccountById(id).getPaymentMethod().getCompany()
+                    .getPreferedAccount();
+
+            if (preferedPaymentMethod != null && preferedPaymentMethod.getBankAccount().getId() == id) {
+                CompanyModel company = preferedPaymentMethod.getCompany();
+                company.setPreferedAccount(null);
+
+                companyRepository.save(company);
+            }
+
             PaymentMethodModel paymentMethod = bankAccount.getPaymentMethod();
             paymentMethodRepository.delete(paymentMethod);
             bankCoopAccountRepository.delete(bankAccount);
@@ -122,7 +152,7 @@ public class BankAccountService {
     }
 
     public BankCoopAccountModel getAccountById(Long id) {
-        return bankCoopAccountRepository.findById(id).orElse(null);
+        return bankCoopAccountRepository.findByAccountId(id);
     }
 
     public BankCoopAccountModel getBankAccountByNumber(String number) {

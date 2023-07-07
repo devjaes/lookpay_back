@@ -320,15 +320,6 @@ public class PaymentMethodService {
 
         try {
             if (type.equals("CARD")) {
-                PaymentMethodModel clientPreferedPaymentMethod = cardService.getCardById(id).getPaymentMethod()
-                        .getClient().getPreferedAccount();
-
-                if (clientPreferedPaymentMethod != null) {
-                    ClientModel client = clientPreferedPaymentMethod.getClient();
-                    client.setPreferedAccount(null);
-
-                    clientRepository.save(client);
-                }
 
                 if (cardService.deleteCard(id)) {
                     response.put("message", "Card deleted successfully");
@@ -344,26 +335,6 @@ public class PaymentMethodService {
             }
 
             if (type.equals("ACCOUNT")) {
-                PaymentMethodModel preferedPaymentMethod = bankAccountService.getAccountById(id).getPaymentMethod()
-                        .getClient().getPreferedAccount();
-
-                if (preferedPaymentMethod != null) {
-                    ClientModel client = preferedPaymentMethod.getClient();
-                    client.setPreferedAccount(null);
-
-                    clientRepository.save(client);
-                }
-
-                preferedPaymentMethod = bankAccountService.getAccountById(id).getPaymentMethod().getCompany()
-                        .getPreferedAccount();
-
-                if (preferedPaymentMethod != null) {
-                    CompanyModel company = preferedPaymentMethod.getCompany();
-                    company.setPreferedAccount(null);
-
-                    companyRepository.save(company);
-                }
-
                 if (bankAccountService.deleteBankAccount(id)) {
                     response.put("message", "Bank account deleted successfully");
                     response.put("status", HttpStatus.OK.value());

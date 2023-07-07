@@ -8,14 +8,19 @@ import org.springframework.stereotype.Service;
 import dev.jeep.Lookpay.dtos.CardResponseDTO;
 import dev.jeep.Lookpay.enums.CardTypeEnum;
 import dev.jeep.Lookpay.models.CDCardModel;
+import dev.jeep.Lookpay.models.ClientModel;
 import dev.jeep.Lookpay.models.PaymentMethodModel;
 import dev.jeep.Lookpay.repository.CDCardRepository;
+import dev.jeep.Lookpay.repository.ClientRepository;
 import dev.jeep.Lookpay.repository.PaymentMethodRepository;
 
 @Service
 public class CardService {
     @Autowired
     private CDCardRepository cdCardRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
@@ -25,7 +30,7 @@ public class CardService {
     }
 
     public CDCardModel getCardById(Long id) {
-        return cdCardRepository.findById(id).orElse(null);
+        return cdCardRepository.findByCardId(id);
     }
 
     public List<CDCardModel> getAllDCardsByClientId(Long clientId) {
@@ -92,6 +97,16 @@ public class CardService {
 
             if (card == null) {
                 return false;
+            }
+
+            PaymentMethodModel clientPreferedPaymentMethod = this.getCardById(id).getPaymentMethod()
+                    .getClient().getPreferedAccount();
+
+            if (clientPreferedPaymentMethod != null && clientPreferedPaymentMethod.getCdCard().getId() == id) {
+                ClientModel client = clientPreferedPaymentMethod.getClient();
+                client.setPreferedAccount(null);
+
+                clientRepository.save(client);
             }
 
             PaymentMethodModel paymentMethod = card.getPaymentMethod();

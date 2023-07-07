@@ -99,10 +99,11 @@ public class CardService {
                 return false;
             }
 
-            PaymentMethodModel clientPreferedPaymentMethod = this.getCardById(id).getPaymentMethod()
-                    .getClient().getPreferedAccount();
+            PaymentMethodModel clientPreferedPaymentMethod = this.getCardById(id).getPaymentMethod().getClientId()
+                    .getPreferedAccount();
 
-            if (clientPreferedPaymentMethod != null && clientPreferedPaymentMethod.getCdCard().getId() == id) {
+            if (clientPreferedPaymentMethod != null &&
+                    clientPreferedPaymentMethod.getCdCard().getId() == id) {
                 ClientModel client = clientPreferedPaymentMethod.getClient();
                 client.setPreferedAccount(null);
 
@@ -116,6 +117,9 @@ public class CardService {
             return true;
 
         } catch (Exception e) {
+            System.out.println("=======================" + e.getMessage());
+            System.out.println("=======================" + this.getCardById(id).getPaymentMethod().getClientId());
+
             return false;
         }
     }

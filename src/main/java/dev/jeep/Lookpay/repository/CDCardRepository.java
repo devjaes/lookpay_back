@@ -11,7 +11,7 @@ import dev.jeep.Lookpay.models.CDCardModel;
 
 @Repository
 public interface CDCardRepository extends JpaRepository<CDCardModel, Long> {
-    @Query(value = "SELECT * FROM cd_cards cd inner join payment_methods p on p.cd_card_id = cd.id WHERE cd.number = :number", nativeQuery = true)
+    @Query(value = "SELECT cd.id, cd.balance, cd.card_holder_name, cd.card_type, cd.cvv, cd.expiration_date, cd.\"number\" FROM cd_cards cd inner join payment_methods p on p.cd_card_id = cd.id WHERE cd.number = cast(:number as text)", nativeQuery = true)
     CDCardModel findByNumber(@Param("number") String number);
 
     @Query(value = "SELECT cd.id, cd.balance, cd.card_holder_name, cd.card_type, cd.cvv, cd.expiration_date, cd.\"number\" FROM cd_cards cd inner join payment_methods p on p.cd_card_id = cd.id WHERE p.client_id =:clientId", nativeQuery = true)

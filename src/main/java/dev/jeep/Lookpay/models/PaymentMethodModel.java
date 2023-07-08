@@ -36,9 +36,11 @@ public class PaymentMethodModel {
     private CDCardModel cdCard;
 
     @OneToOne(mappedBy = "preferedAccount")
+    @JoinColumn(name = "prefered_company_id", referencedColumnName = "id")
     private CompanyModel company;
 
     @OneToOne(mappedBy = "preferedAccount")
+    @JoinColumn(name = "prefered_client_id", referencedColumnName = "id")
     private ClientModel client;
 
     @ManyToOne()

@@ -11,7 +11,13 @@ import dev.jeep.Lookpay.models.BankCoopAccountModel;
 
 @Repository
 public interface BankCoopAccountRepository extends JpaRepository<BankCoopAccountModel, Long> {
-        @Query(value = "SELECT * FROM bank_coop_accounts WHERE account_number = :number", nativeQuery = true)
+        @Query(value = "SELECT b.id, b.balance, b.account_holderdni, b.account_holder_name, b.account_holder_email, \n"
+                        + //
+                        "b.account_type, b.bank_name, b.account_password, b.account_number \n" + //
+                        "FROM bank_coop_accounts b \n" + //
+                        "inner join payment_methods p \n" + //
+                        "on p.bank_account_id = b.id \n" + //
+                        "WHERE b.account_number = cast(:number as text)", nativeQuery = true)
         BankCoopAccountModel findByNumber(@Param("number") String number);
 
         @Query(value = "SELECT b.id, b.balance, b.account_holderdni, b.account_holder_name, b.account_holder_email, b.account_type, b.bank_name, b.account_password, b.account_number FROM bank_coop_accounts b inner join payment_methods p on p.bank_account_id = b.id WHERE p.client_id =:clientId", nativeQuery = true)

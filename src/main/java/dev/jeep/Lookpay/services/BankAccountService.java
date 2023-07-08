@@ -119,15 +119,19 @@ public class BankAccountService {
             if (bankAccount == null) {
                 return false;
             }
+            PaymentMethodModel preferedPaymentMethod;
 
-            PaymentMethodModel preferedPaymentMethod = this.getAccountById(id).getPaymentMethod()
-                    .getClientId().getPreferedAccount();
+            ClientModel client = bankAccount.getPaymentMethod().getClientId();
 
-            if (preferedPaymentMethod != null && preferedPaymentMethod.getBankAccount().getId() == id) {
-                ClientModel client = preferedPaymentMethod.getClientId();
-                client.setPreferedAccount(null);
+            if (client != null) {
+                preferedPaymentMethod = this.getAccountById(id).getPaymentMethod()
+                        .getClientId().getPreferedAccount();
 
-                clientRepository.save(client);
+                if (preferedPaymentMethod != null && preferedPaymentMethod.getBankAccount().getId() == id) {
+                    client.setPreferedAccount(null);
+
+                    clientRepository.save(client);
+                }
             }
 
             preferedPaymentMethod = this.getAccountById(id).getPaymentMethod().getCompanyId()
@@ -142,11 +146,12 @@ public class BankAccountService {
 
             PaymentMethodModel paymentMethod = bankAccount.getPaymentMethod();
             paymentMethodRepository.delete(paymentMethod);
-            bankCoopAccountRepository.delete(bankAccount);
+            // bankCoopAccountRepository.delete(bankAccount);
 
             return true;
 
         } catch (Exception e) {
+            System.out.println("=======================" + e.getMessage());
             return false;
         }
     }

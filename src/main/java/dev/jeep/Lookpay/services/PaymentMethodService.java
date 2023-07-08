@@ -61,16 +61,21 @@ public class PaymentMethodService {
 
         try {
             if (paymentMethodDto.isCard()) {
-                if (cdCardRepository.findByNumber(paymentMethodDto.getNumber()) != null) {
+                CDCardModel card = cdCardRepository.findByNumber(paymentMethodDto.getNumber());
+                if (card != null) {
                     response.put("message", "Card already exist");
                     response.put("status", HttpStatus.BAD_REQUEST.value());
+                    response.put("card", card);
 
                     return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
                 }
             } else {
-                if (bankCoopAccountRepository.findByNumber(paymentMethodDto.getNumber()) != null) {
+                BankCoopAccountModel bankCoopAccount = bankCoopAccountRepository
+                        .findByNumber(paymentMethodDto.getNumber());
+                if (bankCoopAccount != null) {
                     response.put("message", "Account already exist");
                     response.put("status", HttpStatus.BAD_REQUEST.value());
+                    response.put("account", bankCoopAccount);
 
                     return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
                 }

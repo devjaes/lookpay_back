@@ -7,9 +7,9 @@ public enum CardTypeEnum {
 
     public static CardTypeEnum fromString(String str) {
         switch (str) {
-            case "TARJETA DE CREDITO":
+            case "CREDIT_CARD":
                 return CardTypeEnum.CREDIT_CARD;
-            case "TARJETA DE DEBITO":
+            case "DEBIT_CARD":
                 return CardTypeEnum.DEBIT_CARD;
             default:
                 return null;

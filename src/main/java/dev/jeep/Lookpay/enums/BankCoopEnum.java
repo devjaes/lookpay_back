@@ -46,4 +46,9 @@ public enum BankCoopEnum {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+        return this.bankName;
+    }
 }

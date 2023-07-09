@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface ClientRepository extends JpaRepository<ClientModel, Long> {
-    @Query(value = "SELECT * FROM clients inner join WHERE dni=:dni", nativeQuery = true)
+    @Query(value = "SELECT * FROM clients WHERE dni=:dni", nativeQuery = true)
     ClientModel getByDni(@Param("dni") String dni);
 
 }

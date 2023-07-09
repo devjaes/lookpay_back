@@ -18,7 +18,6 @@ import dev.jeep.Lookpay.dtos.UserRegisterDTO;
 import dev.jeep.Lookpay.dtos.UserUpdateDTO;
 import dev.jeep.Lookpay.models.UserModel;
 import dev.jeep.Lookpay.repository.ClientRepository;
-import dev.jeep.Lookpay.repository.UserRepository;
 import dev.jeep.Lookpay.services.ClientService;
 import dev.jeep.Lookpay.services.UserService;
 

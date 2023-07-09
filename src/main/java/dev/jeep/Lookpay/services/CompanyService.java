@@ -221,8 +221,20 @@ public class CompanyService {
 
             companyRepository.save(company);
 
+            BankCoopAccountResponseDTO accountDto = new BankCoopAccountResponseDTO();
+            accountDto.setId(account.getId());
+            accountDto.setName(account.getPaymentMethod().getName());
+            accountDto.setNumber(account.getAccountNumber());
+            accountDto.setAccountType(account.getAccountType().toString());
+            accountDto.setBankName(account.getBankName().toString());
+            accountDto.setAccountHolderName(account.getAccountHolderName());
+            accountDto.setAccountHolderDNI(account.getAccountHolderDNI());
+            accountDto.setAccountHolderEmail(account.getAccountHolderEmail());
+            accountDto.setAccountPassword(account.getAccountPassword());
+
             response.put("message", "Prefered payment method set successfully");
             response.put("status", HttpStatus.OK.value());
+            response.put("account", accountDto);
 
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.OK);
         } catch (Exception e) {

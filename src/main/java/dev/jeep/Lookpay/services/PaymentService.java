@@ -16,6 +16,7 @@ import dev.jeep.Lookpay.models.ClientModel;
 import dev.jeep.Lookpay.models.PaymentMethodModel;
 import dev.jeep.Lookpay.models.PaymentModel;
 import dev.jeep.Lookpay.repository.PaymentRepository;
+import dev.jeep.Lookpay.utils.DateUtil;
 
 @Service
 public class PaymentService {
@@ -40,9 +41,10 @@ public class PaymentService {
 
             if (newPayment == null) {
                 response.put("message", "Payment creation error");
-                response.put("status", 400);
-                response.put("error", "error aqui");
-                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
+                response.put("status", HttpStatus.NO_CONTENT.value());
+                response.put("error",
+                        "El cliente no tiene una cuenta preferida, no tiene cuentas o tarjetas registradas o no tiene saldo suficiente");
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NO_CONTENT);
             }
 
             response.put("message", "Payment created successfully");
@@ -71,6 +73,7 @@ public class PaymentService {
             }
 
             if (client == null) {
+                System.out.println("client is null");
                 return null;
             }
 
@@ -85,6 +88,7 @@ public class PaymentService {
                 List<PaymentMethodModel> accounts = client.getPaymentMethods();
 
                 if (accounts.size() == 0) {
+                    System.out.println("accounts is null");
                     return null;
                 }
 
@@ -99,7 +103,8 @@ public class PaymentService {
                             newPayment.setName(payment.getName());
                             newPayment.setAmount(payment.getAmount());
                             newPayment.setDescription(payment.getDescription());
-                            newPayment.setPaymentDate(Timestamp.valueOf(payment.getPaymentDate().replaceAll("T", " ")));
+                            newPayment.setPaymentDate(
+                                    Timestamp.valueOf(DateUtil.transformWebDateToDBDate(payment.getPaymentDate())));
                             newPayment.setCompanyName(payment.getCompanyName());
                             newPayment.setCompanyRuc(payment.getCompanyRuc());
                             newPayment.setCompanyAccountName(payment.getCompanyAccountName());
@@ -127,7 +132,8 @@ public class PaymentService {
                             newPayment.setName(payment.getName());
                             newPayment.setAmount(payment.getAmount());
                             newPayment.setDescription(payment.getDescription());
-                            newPayment.setPaymentDate(Timestamp.valueOf(payment.getPaymentDate().replaceAll("T", " ")));
+                            newPayment.setPaymentDate(
+                                    Timestamp.valueOf(DateUtil.transformWebDateToDBDate(payment.getPaymentDate())));
                             newPayment.setCompanyName(payment.getCompanyName());
                             newPayment.setCompanyRuc(payment.getCompanyRuc());
                             newPayment.setCompanyAccountName(payment.getCompanyAccountName());
@@ -161,7 +167,8 @@ public class PaymentService {
                         newPayment.setName(payment.getName());
                         newPayment.setAmount(payment.getAmount());
                         newPayment.setDescription(payment.getDescription());
-                        newPayment.setPaymentDate(Timestamp.valueOf(payment.getPaymentDate().replaceAll("T", " ")));
+                        newPayment.setPaymentDate(
+                                Timestamp.valueOf(DateUtil.transformWebDateToDBDate(payment.getPaymentDate())));
                         newPayment.setCompanyName(payment.getCompanyName());
                         newPayment.setCompanyRuc(payment.getCompanyRuc());
                         newPayment.setCompanyAccountName(payment.getCompanyAccountName());
@@ -192,7 +199,8 @@ public class PaymentService {
                         newPayment.setName(payment.getName());
                         newPayment.setAmount(payment.getAmount());
                         newPayment.setDescription(payment.getDescription());
-                        newPayment.setPaymentDate(Timestamp.valueOf(payment.getPaymentDate().replaceAll("T", " ")));
+                        newPayment.setPaymentDate(
+                                Timestamp.valueOf(DateUtil.transformWebDateToDBDate(payment.getPaymentDate())));
                         newPayment.setCompanyName(payment.getCompanyName());
                         newPayment.setCompanyRuc(payment.getCompanyRuc());
                         newPayment.setCompanyAccountName(payment.getCompanyAccountName());
@@ -210,10 +218,10 @@ public class PaymentService {
 
                         return paymentRepository.save(newPayment);
                     }
-
+                    System.out.println("error aqui 1");
                     return null;
                 }
-
+                System.out.println("error aqui 2");
                 return null;
             }
 

@@ -203,21 +203,23 @@ public class UserService {
     public ResponseEntity<LinkedHashMap<String, Object>> resetRequestPassword(
             ResetRequestPasswordDTO resetPasswordDTO) {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
-        UserModel user = userRepository.getByEmail(resetPasswordDTO.getEmail());
-
-        if (user == null) {
-            response.put("message", "User not found");
-            response.put("status", HttpStatus.NOT_FOUND.value());
-
-            return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
-        }
-
         try {
+            UserModel user = userRepository.getByEmail(resetPasswordDTO.getEmail());
+
+            if (user == null) {
+                response.put("message", "User not found");
+                System.out.println("User not found");
+                response.put("status", HttpStatus.NOT_FOUND.value());
+
+                return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
+            }
+
             if (resetPasswordDTO.getType().equals("CLIENT")) {
                 ClientModel client = clientRepository.findById(user.getClient().getId()).get();
 
                 if (client == null) {
                     response.put("message", "Client not found");
+                    System.out.println("Client not found");
                     response.put("status", HttpStatus.NOT_FOUND.value());
 
                     return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -229,6 +231,7 @@ public class UserService {
                         || !user.getName().equals(resetPasswordDTO.getName())) {
 
                     response.put("message", "Invalid data");
+                    System.out.println("Invalid data");
                     response.put("status", HttpStatus.BAD_REQUEST.value());
 
                     return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
@@ -246,6 +249,7 @@ public class UserService {
 
                 if (company == null) {
                     response.put("message", "Company not found");
+                    System.out.println("Company not found");
                     response.put("status", HttpStatus.NOT_FOUND.value());
 
                     return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -257,6 +261,7 @@ public class UserService {
                         || !user.getName().equals(resetPasswordDTO.getName())) {
 
                     response.put("message", "Invalid data");
+                    System.out.println("Invalid data");
                     response.put("status", HttpStatus.BAD_REQUEST.value());
 
                     return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
@@ -271,6 +276,7 @@ public class UserService {
 
         } catch (Exception e) {
             response.put("message", "Error ocurred in the server");
+            response.put("error", e.getCause());
             response.put("status", HttpStatus.BAD_REQUEST.value());
 
             return new ResponseEntity<LinkedHashMap<String, Object>>(response, HttpStatus.BAD_REQUEST);
@@ -282,8 +288,8 @@ public class UserService {
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
 
         UserModel user = userRepository.findById(id).get();
-
         try {
+
             if (user == null) {
                 response.put("message", "User not found");
                 response.put("status", HttpStatus.NOT_FOUND.value());

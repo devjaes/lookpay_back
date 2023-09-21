@@ -1,5 +1,5 @@
 # LookPay
-Spring Boot Project with react using Face-API.js
+Spring Boot Project, emulation of facial recognition payment system using AWS rekognition
 
 
 To run the project:

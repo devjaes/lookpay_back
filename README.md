@@ -5,7 +5,7 @@ Spring Boot Project, emulation of facial recognition payment system using AWS re
 JDK 17, Spring boot
 
 ### Database
-postgreSQL
+PostgreSQL
 
 ## To run the project
 

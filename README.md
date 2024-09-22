@@ -1,8 +1,13 @@
 # LookPay
 Spring Boot Project, emulation of facial recognition payment system using AWS rekognition
 
+## Technologies used
+JDK 17, Spring boot
 
-To run the project:
+### Database
+postgreSQL
+
+## To run the project
 
 ```bash
 #if you use linux or mac

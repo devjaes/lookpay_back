@@ -1,18 +1,47 @@
-# LookPay
-Spring Boot Project, emulation of facial recognition payment system using AWS rekognition
+# LookPay — Backend (2022)
 
-## Technologies used
-JDK 17, Spring boot
+> Spring Boot service for a facial-recognition payment simulation, exploring password-less biometric authentication via AWS Rekognition.
 
-### Database
-PostgreSQL
+## Overview
 
-## To run the project
+Early exploration (2022) of biometric checkout: a user enrolls a face, then at the point of sale the live capture is matched against the enrolled identity using AWS Rekognition. The transaction outcome is a **simulated** payment approval — no real payment processor is integrated.
+
+This repo is the backend half of the system. It exposes the REST API consumed by the kiosk frontend, persists users/clients/companies/cards/payments in PostgreSQL, and orchestrates the face-match decision flow.
+
+## Stack
+
+| Layer | Tech |
+|---|---|
+| Language | Java 17 |
+| Framework | Spring Boot 3.1 |
+| Persistence | Spring Data JPA + PostgreSQL |
+| Face matching | AWS Rekognition |
+| Password hashing | Argon2 |
+| Build | Maven (`mvnw`) |
+
+## Repo scope
+
+- This repo is the **backend** only.
+- The kiosk frontend (Next.js) lives in a separate private repo.
+
+## Local setup
 
 ```bash
-#if you use linux or mac
-sh mvnw spring-boot:run
+# 1. Configure DB credentials and AWS Rekognition access
+#    in src/main/resources/application.yaml (or via a .env file —
+#    spring-dotenv is wired in)
 
-#if you use windows
-./mvnw spring-boot:run
+# 2. Run
+./mvnw spring-boot:run        # macOS / Linux
+mvnw.cmd spring-boot:run      # Windows
 ```
+
+## Status
+
+- **Earlier project (2022).** Exploration of biometric auth, not production-hardened.
+- No liveness detection. Simulated payment outcome — no payment-processor integration.
+- Kept public as a record of the architecture and AWS integration approach.
+
+## Portfolio
+
+[Project entry on devjaes.dev →](https://devjaes.dev/work/lookpay)

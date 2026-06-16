@@ -1,4 +1,4 @@
-# LookPay — Backend (2022)
+# LookPay - Backend (2022)
 
 > Spring Boot service for a facial-recognition payment simulation, exploring password-less biometric authentication via AWS Rekognition.
 
@@ -28,7 +28,7 @@ This repo is the backend half of the system. It exposes the REST API consumed by
 
 ```bash
 # 1. Configure DB credentials and AWS Rekognition access
-#    in src/main/resources/application.yaml (or via a .env file —
+#    in src/main/resources/application.yaml (or via a .env file -
 #    spring-dotenv is wired in)
 
 # 2. Run
@@ -43,4 +43,4 @@ mvnw.cmd spring-boot:run      # Windows
 
 ## Portfolio
 
-[Project entry on devjaes.dev →](https://devjaes.dev/work/lookpay)
+[Project entry on devjaes.dev](https://devjaes.dev/work/lookpay)

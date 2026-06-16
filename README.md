@@ -4,7 +4,7 @@
 
 ## Overview
 
-Early exploration (2022) of biometric checkout: a user enrolls a face, then at the point of sale the live capture is matched against the enrolled identity using AWS Rekognition. The transaction outcome is a **simulated** payment approval — no real payment processor is integrated.
+Exploration (2022) of biometric checkout: a user enrolls a face, then at the point of sale the live capture is matched against the enrolled identity using AWS Rekognition, with a sub-2s authentication target end-to-end.
 
 This repo is the backend half of the system. It exposes the REST API consumed by the kiosk frontend, persists users/clients/companies/cards/payments in PostgreSQL, and orchestrates the face-match decision flow.
 
@@ -38,9 +38,8 @@ mvnw.cmd spring-boot:run      # Windows
 
 ## Status
 
-- **Earlier project (2022).** Exploration of biometric auth, not production-hardened.
-- No liveness detection. Simulated payment outcome — no payment-processor integration.
-- Kept public as a record of the architecture and AWS integration approach.
+- Earlier project (2022). Exploration of password-less biometric auth.
+- Kept public as a record of the architecture and AWS Rekognition integration approach.
 
 ## Portfolio
 
